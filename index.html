@@ -1,361 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SP NIBA BCA - Complaints & Aspirations</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding: 40px 0;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .header p {
-            color: #e0e8f7;
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            animation: fadeInUp 1s ease-out 0.2s both;
-        }
-
-        .main-content {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            align-items: stretch;
-            flex-wrap: wrap;
-            margin-bottom: 50px;
-        }
-
-        .option-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            flex: 1;
-            min-width: 300px;
-            max-width: 450px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .option-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #1e3c72, #dc143c);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .option-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .option-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        }
-
-        .complaints-card {
-            border-left: 5px solid #dc143c;
-        }
-
-        .aspirations-card {
-            border-left: 5px solid #1e3c72;
-        }
-
-        .card-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            margin-bottom: 25px;
-        }
-
-        .complaints-icon {
-            background: linear-gradient(135deg, #dc143c, #ff6b6b);
-        }
-
-        .aspirations-icon {
-            background: linear-gradient(135deg, #1e3c72, #4dabf7);
-        }
-
-        .card-title {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .complaints-title {
-            color: #dc143c;
-        }
-
-        .aspirations-title {
-            color: #1e3c72;
-        }
-
-        .card-description {
-            color: #666;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .card-button {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .complaints-button {
-            background: linear-gradient(135deg, #dc143c, #ff6b6b);
-        }
-
-        .card-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 40px 0;
-            color: #e0e8f7;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 40px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            animation: modalSlideIn 0.3s ease-out;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #1e3c72;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-        }
-
-        .loading .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #1e3c72;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .status-message {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            display: none;
-            font-weight: bold;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-
-        .error-message {
-            color: #dc143c;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .main-content {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .option-card {
-                max-width: 100%;
-            }
-            
-            .modal-content {
-                margin: 10% auto;
-                padding: 20px;
-                width: 95%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SP NIBA BCA - Complaints & Aspirations</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%); min-height:100vh; overflow-x:hidden; }
+    .container { max-width:1200px; margin:0 auto; padding:20px; }
+    .header { text-align:center; margin-bottom:50px; padding:40px 0; }
+    .header h1 { color:white; font-size:3rem; text-shadow:2px 2px 4px rgba(0,0,0,0.3); }
+    .header p { color:#e0e8f7; font-size:1.2rem; }
+    .main-content { display:flex; gap:40px; justify-content:center; flex-wrap:wrap; margin-bottom:50px; }
+    .option-card { background:white; border-radius:20px; padding:40px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.2); cursor:pointer; flex:1; min-width:300px; max-width:450px; position:relative; }
+    .complaints-card { border-left:5px solid #dc143c; }
+    .aspirations-card { border-left:5px solid #1e3c72; }
+    .card-icon { width:80px; height:80px; margin:0 auto 20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:white; }
+    .complaints-icon { background:linear-gradient(135deg,#dc143c,#ff6b6b); }
+    .aspirations-icon { background:linear-gradient(135deg,#1e3c72,#4dabf7); }
+    .card-title { font-size:2rem; margin-bottom:15px; }
+    .complaints-title { color:#dc143c; }
+    .aspirations-title { color:#1e3c72; }
+    .card-description { color:#666; font-size:1.1rem; margin-bottom:25px; }
+    .card-button { background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; padding:15px 30px; border-radius:25px; font-size:1.1rem; cursor:pointer; }
+    .complaints-button { background:linear-gradient(135deg,#dc143c,#ff6b6b); }
+    .footer { text-align:center; padding:40px 0; color:#e0e8f7; border-top:1px solid rgba(255,255,255,0.1); }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); }
+    .modal-content { background:white; margin:5% auto; padding:40px; border-radius:15px; max-width:600px; max-height:90vh; overflow-y:auto; }
+    .close { float:right; font-size:28px; cursor:pointer; }
+    .form-group { margin-bottom:20px; }
+    .form-group label { display:block; margin-bottom:8px; font-weight:bold; }
+    .form-group input, .form-group textarea, .form-group select { width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; }
+    .submit-btn { background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; padding:15px; border-radius:8px; width:100%; font-size:1.1rem; cursor:pointer; }
+    .loading { display:none; text-align:center; margin-top:10px; }
+    .spinner { display:inline-block; width:20px; height:20px; border:3px solid #f3f3f3; border-top:3px solid #1e3c72; border-radius:50%; animation:spin 1s linear infinite; }
+    .status-message { display:none; margin-top:15px; padding:15px; border-radius:8px; font-weight:bold; }
+    .success { background:#d4edda; color:#155724; }
+    .error { background:#f8d7da; color:#721c24; }
+    @keyframes spin {0%{transform:rotate(0);}100%{transform:rotate(360deg);}}
+  </style>
 </head>
 <body>
   <div class="container">
@@ -364,7 +47,6 @@
       <h1>KOMCAB KOMNAS SP NIBA</h1>
       <p>Komite Cabang - We value your feedback and aspirations for continuous improvement</p>
     </div>
-
     <div class="main-content">
       <div class="option-card complaints-card" id="complaintsCard">
         <div class="card-icon complaints-icon">⚠️</div>
@@ -372,7 +54,6 @@
         <p class="card-description">Have an issue or concern? Let us know about any problems you've experienced.</p>
         <button class="card-button complaints-button">File Complaint</button>
       </div>
-
       <div class="option-card aspirations-card" id="aspirationsCard">
         <div class="card-icon aspirations-icon">💡</div>
         <h2 class="card-title aspirations-title">Share Aspiration</h2>
@@ -380,124 +61,103 @@
         <button class="card-button">Share Ideas</button>
       </div>
     </div>
-
-    <div class="footer">
-      <p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p>
-    </div>
+    <div class="footer"><p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p></div>
   </div>
-
   <!-- Complaints Modal -->
   <div id="complaintsModal" class="modal">
     <div class="modal-content">
       <span class="close" id="complaintsClose">&times;</span>
-      <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
+      <h2 style="color:#dc143c;">Submit Your Complaint</h2>
       <form id="complaintsForm">
-        <!-- include form fields here -->
+        <div class="form-group">
+          <label for="complaintName">Full Name *</label>
+          <input type="text" id="complaintName" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="complaintEmail">Email *</label>
+          <input type="email" id="complaintEmail" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="complaintPhone">Phone Number</label>
+          <input type="tel" id="complaintPhone" name="phone">
+        </div>
+        <div class="form-group">
+          <label for="complaintCategory">Category *</label>
+          <select id="complaintCategory" name="category" required>
+            <option value="">Select Category</option>
+            <option value="service">Service Quality</option>
+            <option value="staff">Staff Behavior</option>
+            <option value="facility">Facility Issues</option>
+            <option value="system">System Problems</option>
+            <option value="billing">Billing Issues</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="complaintDescription">Describe Your Complaint *</label>
+          <textarea id="complaintDescription" name="description" rows="5" required></textarea>
+        </div>
         <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
         <div class="loading" id="complaintLoading"><div class="spinner"></div><p>Submitting your complaint...</p></div>
         <div class="status-message" id="complaintStatus"></div>
       </form>
     </div>
   </div>
-
   <!-- Aspirations Modal -->
   <div id="aspirationsModal" class="modal">
     <div class="modal-content">
       <span class="close" id="aspirationsClose">&times;</span>
-      <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
+      <h2 style="color:#1e3c72;">Share Your Aspiration</h2>
       <form id="aspirationsForm">
-        <!-- include form fields here -->
+        <div class="form-group">
+          <label for="aspirationName">Full Name *</label>
+          <input type="text" id="aspirationName" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="aspirationEmail">Email *</label>
+          <input type="email" id="aspirationEmail" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="aspirationPhone">Phone Number</label>
+          <input type="tel" id="aspirationPhone" name="phone">
+        </div>
+        <div class="form-group">
+          <label for="aspirationCategory">Category *</label>
+          <select id="aspirationCategory" name="category" required>
+            <option value="">Select Category</option>
+            <option value="service-improvement">Service Improvement</option>
+            <option value="new-feature">New Features</option>
+            <option value="policy">Policy Suggestions</option>
+            <option value="innovation">Innovation Ideas</option>
+            <option value="training">Training & Development</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="aspirationDescription">Describe Your Aspiration *</label>
+          <textarea id="aspirationDescription" name="description" rows="5" required></textarea>
+        </div>
         <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
         <div class="loading" id="aspirationLoading"><div class="spinner"></div><p>Submitting your aspiration...</p></div>
         <div class="status-message" id="aspirationStatus"></div>
       </form>
     </div>
   </div>
-
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Modal triggers
-      document.getElementById('complaintsCard').addEventListener('click', () => openModal('complaints'));
-      document.getElementById('aspirationsCard').addEventListener('click', () => openModal('aspirations'));
-
-      // Modal closes
-      document.getElementById('complaintsClose').addEventListener('click', () => closeModal('complaints'));
-      document.getElementById('aspirationsClose').addEventListener('click', () => closeModal('aspirations'));
-      window.addEventListener('click', e => {
-        if (e.target.classList.contains('modal')) {
-          ['complaints','aspirations'].forEach(closeModal);
-        }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      ['complaints','aspirations'].forEach(type=>{
+        document.getElementById(type+'Card'.replace('Card','Card')).addEventListener('click',()=>openModal(type));
+        document.getElementById(type+'Close'.replace('Close',type+'Close')).addEventListener('click',()=>closeModal(type));
+        document.getElementById(type+'Form').addEventListener('submit',e=>{e.preventDefault();handleFormSubmit(type);});
       });
-      window.addEventListener('keydown', e => {
-        if (e.key === 'Escape') ['complaints','aspirations'].forEach(closeModal);
-      });
-
-      // Form setup
-      ['complaints','aspirations'].forEach(type => {
-        const form = document.getElementById(`${type}Form`);
-        form.addEventListener('submit', e => {
-          e.preventDefault();
-          handleFormSubmit(type);
-        });
-      });
+      window.addEventListener('click',e=>{if(e.target.classList.contains('modal'))['complaints','aspirations'].forEach(closeModal);} );
+      window.addEventListener('keydown',e=>{if(e.key==='Escape')['complaints','aspirations'].forEach(closeModal);} );
     });
-
-    function openModal(type) {
-      document.getElementById(`${type}Modal`).style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(type) {
-      document.getElementById(`${type}Modal`).style.display = 'none';
-      document.body.style.overflow = 'auto';
-      document.getElementById(`${type}Form`).reset();
-      document.getElementById(`${type === 'complaints' ? 'complaintStatus' : 'aspirationStatus'}`).style.display = 'none';
-    }
-
-    function handleFormSubmit(type) {
-      const singular = type === 'complaints' ? 'complaint' : 'aspiration';
-      const form = document.getElementById(`${type}Form`);
-      const formData = new FormData(form);
-      formData.append('type', singular);
-      formData.append('timestamp', new Date().toISOString());
-
-      const submitBtn = document.getElementById(`${singular}SubmitBtn`);
-      const loadingDiv = document.getElementById(`${singular}Loading`);
-      const statusDiv = document.getElementById(`${singular}Status`);
-
-      submitBtn.disabled = true;
-      loadingDiv.style.display = 'block';
-      statusDiv.style.display = 'none';
-
-      const urlEncoded = new URLSearchParams();
-      for (let [key, value] of formData.entries()) urlEncoded.append(key, value);
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: urlEncoded
-      })
-      .then(res => res.json())
-      .then(data => showStatus(singular, data.status==='success', data.message))
-      .catch(err => showStatus(singular, false, 'Submission failed'));
-    }
-
-    function showStatus(singular, success, message) {
-      const submitBtn = document.getElementById(`${singular}SubmitBtn`);
-      const loadingDiv = document.getElementById(`${singular}Loading`);
-      const statusDiv = document.getElementById(`${singular}Status`);
-
-      submitBtn.disabled = false;
-      loadingDiv.style.display = 'none';
-
-      statusDiv.innerText = (success ? '✅ ' : '❌ ') + message;
-      statusDiv.className = 'status-message ' + (success ? 'success' : 'error');
-      statusDiv.style.display = 'block';
-
-      if (success) setTimeout(() => closeModal(singular==='complaint'?'complaints':'aspirations'), 3000);
-    }
+    function openModal(type){document.getElementById(type+'Modal').style.display='block';document.body.style.overflow='hidden';}
+    function closeModal(type){document.getElementById(type+'Modal').style.display='none';document.body.style.overflow='auto';document.getElementById(type+'Form').reset();document.getElementById(type==='complaints'?'complaintStatus':'aspirationStatus').style.display='none';}
+    function handleFormSubmit(type){const sing=type==='complaints'?'complaint':'aspiration';const form=document.getElementById(type+'Form');const data=new FormData(form);data.append('type',sing);data.append('timestamp',new Date().toISOString());const btn=document.getElementById(sing+'SubmitBtn'),load=document.getElementById(sing+'Loading'),stat=document.getElementById(sing+'Status');btn.disabled=true;load.style.display='block';stat.style.display='none';const p=new URLSearchParams();for(let[k,v]of data.entries())p.append(k,v);fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p}).then(()=>showStatus(sing,true,'Submitted!')).catch(()=>showStatus(sing,false,'Submission failed'));}
+    function showStatus(sing,ok,msg){const b=document.getElementById(sing+'SubmitBtn'),l=document.getElementById(sing+'Loading'),s=document.getElementById(sing+'Status');b.disabled=false;l.style.display='none';s.innerText=(ok?'✅ ':'❌ ')+msg;s.className='status-message '+(ok?'success':'error');s.style.display='block';if(ok)setTimeout(()=>closeModal(sing==='complaint'?'complaints':'aspirations'),3000);}
   </script>
 </body>
 </html>

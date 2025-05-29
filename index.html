@@ -6,13 +6,13 @@
   <title>SP NIBA BCA - Complaints & Aspirations</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%); min-height:100vh; overflow-x:hidden; }
+    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(135deg,#1e3c72,#2a5298); min-height:100vh; overflow-x:hidden; }
     .container { max-width:1200px; margin:0 auto; padding:20px; }
     .header { text-align:center; margin-bottom:50px; padding:40px 0; }
     .header h1 { color:white; font-size:3rem; text-shadow:2px 2px 4px rgba(0,0,0,0.3); }
     .header p { color:#e0e8f7; font-size:1.2rem; }
     .main-content { display:flex; gap:40px; justify-content:center; flex-wrap:wrap; margin-bottom:50px; }
-    .option-card { background:white; border-radius:20px; padding:40px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.2); cursor:pointer; flex:1; min-width:300px; max-width:450px; position:relative; }
+    .option-card { background:white; border-radius:20px; padding:40px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.2); cursor:pointer; flex:1; min-width:300px; max-width:450px; }
     .complaints-card { border-left:5px solid #dc143c; }
     .aspirations-card { border-left:5px solid #1e3c72; }
     .card-icon { width:80px; height:80px; margin:0 auto 20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:white; }
@@ -26,7 +26,7 @@
     .complaints-button { background:linear-gradient(135deg,#dc143c,#ff6b6b); }
     .footer { text-align:center; padding:40px 0; color:#e0e8f7; border-top:1px solid rgba(255,255,255,0.1); }
     .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); }
-    .modal-content { background:white; margin:5% auto; padding:40px; border-radius:15px; max-width:600px; max-height:90vh; overflow-y:auto; }
+    .modal-content { background:white; margin:5% auto; padding:40px; border-radius:15px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; }
     .close { float:right; font-size:28px; cursor:pointer; }
     .form-group { margin-bottom:20px; }
     .form-group label { display:block; margin-bottom:8px; font-weight:bold; }
@@ -63,26 +63,29 @@
     </div>
     <div class="footer"><p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p></div>
   </div>
+
   <!-- Complaints Modal -->
   <div id="complaintsModal" class="modal">
     <div class="modal-content">
-      <span class="close" id="complaintsClose">&times;</span>
-      <h2 style="color:#dc143c;">Submit Your Complaint</h2>
+      <span class="close" onclick="closeModal('complaints')">&times;</span>
+      <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
       <form id="complaintsForm">
         <div class="form-group">
-          <label for="complaintName">Full Name *</label>
+          <label for="complaintName">Full Name: <span style="color: red;">*</span></label>
           <input type="text" id="complaintName" name="name" required>
+          <div class="error-message" id="complaintNameError"></div>
         </div>
         <div class="form-group">
-          <label for="complaintEmail">Email *</label>
+          <label for="complaintEmail">Email: <span style="color: red;">*</span></label>
           <input type="email" id="complaintEmail" name="email" required>
+          <div class="error-message" id="complaintEmailError"></div>
         </div>
         <div class="form-group">
-          <label for="complaintPhone">Phone Number</label>
+          <label for="complaintPhone">Phone Number:</label>
           <input type="tel" id="complaintPhone" name="phone">
         </div>
         <div class="form-group">
-          <label for="complaintCategory">Category *</label>
+          <label for="complaintCategory">Category: <span style="color: red;">*</span></label>
           <select id="complaintCategory" name="category" required>
             <option value="">Select Category</option>
             <option value="service">Service Quality</option>
@@ -92,37 +95,45 @@
             <option value="billing">Billing Issues</option>
             <option value="other">Other</option>
           </select>
+          <div class="error-message" id="complaintCategoryError"></div>
         </div>
         <div class="form-group">
-          <label for="complaintDescription">Describe Your Complaint *</label>
-          <textarea id="complaintDescription" name="description" rows="5" required></textarea>
+          <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
+          <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
+          <div class="error-message" id="complaintDescriptionError"></div>
         </div>
         <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
-        <div class="loading" id="complaintLoading"><div class="spinner"></div><p>Submitting your complaint...</p></div>
+        <div class="loading" id="complaintLoading">
+          <div class="spinner"></div>
+          <p>Submitting your complaint...</p>
+        </div>
         <div class="status-message" id="complaintStatus"></div>
       </form>
     </div>
   </div>
+
   <!-- Aspirations Modal -->
   <div id="aspirationsModal" class="modal">
     <div class="modal-content">
-      <span class="close" id="aspirationsClose">&times;</span>
-      <h2 style="color:#1e3c72;">Share Your Aspiration</h2>
+      <span class="close" onclick="closeModal('aspirations')">&times;</span>
+      <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
       <form id="aspirationsForm">
         <div class="form-group">
-          <label for="aspirationName">Full Name *</label>
+          <label for="aspirationName">Full Name: <span style="color: red;">*</span></label>
           <input type="text" id="aspirationName" name="name" required>
+          <div class="error-message" id="aspirationNameError"></div>
         </div>
         <div class="form-group">
-          <label for="aspirationEmail">Email *</label>
+          <label for="aspirationEmail">Email: <span style="color: red;">*</span></label>
           <input type="email" id="aspirationEmail" name="email" required>
+          <div class="error-message" id="aspirationEmailError"></div>
         </div>
         <div class="form-group">
-          <label for="aspirationPhone">Phone Number</label>
+          <label for="aspirationPhone">Phone Number:</label>
           <input type="tel" id="aspirationPhone" name="phone">
         </div>
         <div class="form-group">
-          <label for="aspirationCategory">Category *</label>
+          <label for="aspirationCategory">Category: <span style="color: red;">*</span></label>
           <select id="aspirationCategory" name="category" required>
             <option value="">Select Category</option>
             <option value="service-improvement">Service Improvement</option>
@@ -132,17 +143,23 @@
             <option value="training">Training & Development</option>
             <option value="other">Other</option>
           </select>
+          <div class="error-message" id="aspirationCategoryError"></div>
         </div>
         <div class="form-group">
-          <label for="aspirationDescription">Describe Your Aspiration *</label>
-          <textarea id="aspirationDescription" name="description" rows="5" required></textarea>
+          <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
+          <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
+          <div class="error-message" id="aspirationDescriptionError"></div>
         </div>
         <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
-        <div class="loading" id="aspirationLoading"><div class="spinner"></div><p>Submitting your aspiration...</p></div>
+        <div class="loading" id="aspirationLoading">
+          <div class="spinner"></div>
+          <p>Submitting your aspiration...</p>
+        </div>
         <div class="status-message" id="aspirationStatus"></div>
       </form>
     </div>
   </div>
+
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
     document.addEventListener('DOMContentLoaded', ()=>{
@@ -157,7 +174,7 @@
     function openModal(type){document.getElementById(type+'Modal').style.display='block';document.body.style.overflow='hidden';}
     function closeModal(type){document.getElementById(type+'Modal').style.display='none';document.body.style.overflow='auto';document.getElementById(type+'Form').reset();document.getElementById(type==='complaints'?'complaintStatus':'aspirationStatus').style.display='none';}
     function handleFormSubmit(type){const sing=type==='complaints'?'complaint':'aspiration';const form=document.getElementById(type+'Form');const data=new FormData(form);data.append('type',sing);data.append('timestamp',new Date().toISOString());const btn=document.getElementById(sing+'SubmitBtn'),load=document.getElementById(sing+'Loading'),stat=document.getElementById(sing+'Status');btn.disabled=true;load.style.display='block';stat.style.display='none';const p=new URLSearchParams();for(let[k,v]of data.entries())p.append(k,v);fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p}).then(()=>showStatus(sing,true,'Submitted!')).catch(()=>showStatus(sing,false,'Submission failed'));}
-    function showStatus(sing,ok,msg){const b=document.getElementById(sing+'SubmitBtn'),l=document.getElementById(sing+'Loading'),s=document.getElementById(sing+'Status');b.disabled=false;l.style.display='none';s.innerText=(ok?'✅ ':'❌ ')+msg;s.className='status-message '+(ok?'success':'error');s.style.display='block';if(ok)setTimeout(()=>closeModal(sing==='complaint'?'complaints':'aspirations'),3000);}
+    function showStatus(sing,ok,msg){const b=document.getElementById(sing+'SubmitBtn'),l=document.getElementById(sing+'Loading'),s=document.getElementById(sing+'Status');b.disabled=false;l.style.display='none';s.innerText=(ok?'✅ ':'❌ ')+msg;s.className='status-message '+(ok?'success':'error');s.style.display='block';if(ok)setTimeout(()=>closeModal(sing==='complaint'?'complaints':'aspirations'),3000);}  
   </script>
 </body>
 </html>

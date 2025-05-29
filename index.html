@@ -501,7 +501,18 @@
         e.preventDefault();
         handleFormSubmit('aspirations');
       });
+
+      document.querySelector('.complaints-card').addEventListener('click', () => openModal('complaints'));
+      document.querySelector('.aspirations-card').addEventListener('click', () => openModal('aspirations'));
     });
+
+    function openModal(type) {
+      const modal = document.getElementById(`${type}Modal`);
+      if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+    }
 
     function handleFormSubmit(type) {
       const form = document.getElementById(`${type}Form`);

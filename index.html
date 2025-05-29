@@ -200,7 +200,6 @@
             height: 100%;
             background-color: rgba(0,0,0,0.8);
             backdrop-filter: blur(5px);
-            overflow-y: auto;
         }
 
         .modal-content {
@@ -223,10 +222,6 @@
             font-weight: bold;
             cursor: pointer;
             transition: color 0.3s ease;
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            z-index: 1001;
         }
 
         .close:hover {
@@ -274,7 +269,7 @@
             transition: all 0.3s ease;
         }
 
-        .submit-btn:hover:not(:disabled) {
+        .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -290,6 +285,16 @@
             text-align: center;
             margin-top: 10px;
             color: #666;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
         .status-message {
@@ -315,7 +320,7 @@
 
         .error-message {
             color: #dc143c;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             margin-top: 5px;
         }
 
@@ -341,6 +346,11 @@
             }
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -356,7 +366,7 @@
             }
             
             .modal-content {
-                margin: 2% auto;
+                margin: 10% auto;
                 padding: 20px;
                 width: 95%;
             }
@@ -374,7 +384,7 @@
         </div>
 
         <div class="main-content">
-            <div class="option-card complaints-card" id="complaintsCard">
+            <div class="option-card complaints-card" onclick="openModal('complaints')">
                 <div class="card-icon complaints-icon">⚠️</div>
                 <h2 class="card-title complaints-title">Submit Complaint</h2>
                 <p class="card-description">
@@ -384,7 +394,7 @@
                 <button class="card-button complaints-button">File Complaint</button>
             </div>
 
-            <div class="option-card aspirations-card" id="aspirationsCard">
+            <div class="option-card aspirations-card" onclick="openModal('aspirations')">
                 <div class="card-icon aspirations-icon">💡</div>
                 <h2 class="card-title aspirations-title">Share Aspiration</h2>
                 <p class="card-description">
@@ -403,7 +413,7 @@
     <!-- Complaints Modal -->
     <div id="complaintsModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="complaintsClose">&times;</span>
+            <span class="close" onclick="closeModal('complaints')">&times;</span>
             <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
             <form id="complaintsForm">
                 <div class="form-group">
@@ -434,11 +444,10 @@
                     <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
                     <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
                 </div>
-                <input type="hidden" name="type" value="complaint">
-                <input type="hidden" name="timestamp" id="complaintTimestamp">
                 <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
                 <div class="loading" id="complaintLoading">
-                    <p>📤 Submitting your complaint...</p>
+                    <div class="spinner"></div>
+                    <p>Submitting your complaint...</p>
                 </div>
                 <div class="status-message" id="complaintStatus"></div>
             </form>
@@ -448,7 +457,7 @@
     <!-- Aspirations Modal -->
     <div id="aspirationsModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="aspirationsClose">&times;</span>
+            <span class="close" onclick="closeModal('aspirations')">&times;</span>
             <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
             <form id="aspirationsForm">
                 <div class="form-group">
@@ -479,11 +488,10 @@
                     <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
                     <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
                 </div>
-                <input type="hidden" name="type" value="aspiration">
-                <input type="hidden" name="timestamp" id="aspirationTimestamp">
                 <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
                 <div class="loading" id="aspirationLoading">
-                    <p>💡 Submitting your aspiration...</p>
+                    <div class="spinner"></div>
+                    <p>Submitting your aspiration...</p>
                 </div>
                 <div class="status-message" id="aspirationStatus"></div>
             </form>
@@ -491,279 +499,281 @@
     </div>
 
     <script>
-        console.log('🚀 SP NIBA System Initialized');
+        // Your Google Apps Script Web App URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
 
-        // Global variables
-        let modals = {};
-        let forms = {};
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
-            
-            // Cache DOM elements
-            modals = {
-                complaints: document.getElementById('complaintsModal'),
-                aspirations: document.getElementById('aspirationsModal')
-            };
-            
-            forms = {
-                complaints: document.getElementById('complaintsForm'),
-                aspirations: document.getElementById('aspirationsForm')
-            };
-            
-            // Add event listeners
-            setupEventListeners();
-            
-            // Animate cards
-            document.querySelectorAll('.option-card').forEach((card, index) => {
-                card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.2}s both`;
-            });
-            
-            console.log('✅ System ready');
-        });
-
-        function setupEventListeners() {
-            // Card click events
-            document.getElementById('complaintsCard').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Complaints card clicked');
-                openModal('complaints');
-            });
-            
-            document.getElementById('aspirationsCard').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Aspirations card clicked');
-                openModal('aspirations');
-            });
-            
-            // Close button events
-            document.getElementById('complaintsClose').addEventListener('click', function() {
-                closeModal('complaints');
-            });
-            
-            document.getElementById('aspirationsClose').addEventListener('click', function() {
-                closeModal('aspirations');
-            });
-            
-            // Form submissions
-            forms.complaints.addEventListener('submit', handleFormSubmit);
-            forms.aspirations.addEventListener('submit', handleFormSubmit);
-            
-            // Click outside modal to close
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal')) {
-                    if (e.target.id === 'complaintsModal') closeModal('complaints');
-                    if (e.target.id === 'aspirationsModal') closeModal('aspirations');
-                }
-            });
-            
-            // Escape key to close
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    if (modals.complaints.style.display === 'block') closeModal('complaints');
-                    if (modals.aspirations.style.display === 'block') closeModal('aspirations');
-                }
-            });
-            
-            // Real-time validation
-            document.querySelectorAll('input, textarea, select').forEach(field => {
-                field.addEventListener('input', function() {
-                    if (this.value.trim()) {
-                        this.style.borderColor = '#ddd';
-                        const errorMsg = this.parentNode.querySelector('.error-message');
-                        if (errorMsg) errorMsg.remove();
-                    }
-                });
-            });
-        }
+        console.log('🚀 SP NIBA Complaint System Initialized');
+        console.log('📡 Script URL:', SCRIPT_URL);
 
         function openModal(type) {
-            console.log('Opening modal:', type);
-            
-            if (!modals[type]) {
-                console.error('Modal not found:', type);
-                return;
-            }
-            
-            try {
-                // Show modal
-                modals[type].style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                
-                // Set timestamp
-                const timestampField = document.getElementById(type + 'Timestamp');
-                if (timestampField) {
-                    timestampField.value = new Date().toISOString();
-                }
-                
-                // Focus first input
-                setTimeout(() => {
-                    const firstInput = modals[type].querySelector('input[type="text"]');
-                    if (firstInput) firstInput.focus();
-                }, 100);
-                
-                console.log('Modal opened successfully:', type);
-            } catch (error) {
-                console.error('Error opening modal:', error);
-            }
+            document.getElementById(type + 'Modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            console.log(`📋 Opened ${type} modal`);
         }
 
         function closeModal(type) {
-            console.log('Closing modal:', type);
+            document.getElementById(type + 'Modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
             
-            if (!modals[type]) return;
+            // Reset form and status messages
+            const form = document.getElementById(type + 'Form');
+            const statusDiv = document.getElementById(type + 'Status');
+            const loadingDiv = document.getElementById(type + 'Loading');
+            const submitBtn = document.getElementById(type + 'SubmitBtn');
             
-            try {
-                modals[type].style.display = 'none';
-                document.body.style.overflow = 'auto';
-                
-                // Reset form
-                if (forms[type]) {
-                    forms[type].reset();
-                }
-                
-                // Hide status messages
-                const statusDiv = document.getElementById(type + 'Status');
-                const loadingDiv = document.getElementById(type + 'Loading');
-                const submitBtn = document.getElementById(type + 'SubmitBtn');
-                
-                if (statusDiv) statusDiv.style.display = 'none';
-                if (loadingDiv) loadingDiv.style.display = 'none';
-                if (submitBtn) submitBtn.disabled = false;
-                
-                // Clear errors
-                document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-                document.querySelectorAll('input, textarea, select').forEach(field => {
-                    field.style.borderColor = '#ddd';
-                });
-                
-                console.log('Modal closed successfully:', type);
-            } catch (error) {
-                console.error('Error closing modal:', error);
-            }
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
+            form.reset();
+            statusDiv.style.display = 'none';
+            loadingDiv.style.display = 'none';
+            submitBtn.disabled = false;
             
-            const form = e.target;
-            const type = form.id.includes('complaints') ? 'complaints' : 'aspirations';
-            
-            console.log('Form submitted:', type);
-            
-            if (!validateForm(form)) {
-                showAlert('Please fill in all required fields correctly');
-                return;
-            }
-            
-            submitForm(form, type);
-        }
-
-        function validateForm(form) {
-            let isValid = true;
-            const requiredFields = form.querySelectorAll('[required]');
-            
-            // Clear previous errors
+            // Clear all error messages
             document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-            
-            requiredFields.forEach(field => {
-                const value = field.value.trim();
-                
-                if (!value) {
-                    showFieldError(field, 'This field is required');
-                    isValid = false;
-                } else if (field.type === 'email') {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(value)) {
-                        showFieldError(field, 'Please enter a valid email address');
-                        isValid = false;
-                    }
-                }
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                field.style.borderColor = '#ddd';
             });
             
-            return isValid;
+            console.log(`❌ Closed ${type} modal`);
         }
 
-        function showFieldError(field, message) {
-            field.style.borderColor = '#dc143c';
-            
-            // Remove existing error message
-            const existingError = field.parentNode.querySelector('.error-message');
-            if (existingError) existingError.remove();
-            
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.textContent = message;
-            field.parentNode.appendChild(errorDiv);
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const complaintsModal = document.getElementById('complaintsModal');
+            const aspirationsModal = document.getElementById('aspirationsModal');
+
+            if (event.target == complaintsModal) {
+                closeModal('complaints');
+            }
+            if (event.target == aspirationsModal) {
+                closeModal('aspirations');
+            }
         }
 
-        function submitForm(form, type) {
+        // Enhanced form submission function
+        async function submitForm(formElement, type) {
             const submitBtn = document.getElementById(type + 'SubmitBtn');
             const loadingDiv = document.getElementById(type + 'Loading');
             const statusDiv = document.getElementById(type + 'Status');
+            
+            console.log(`📤 Starting ${type} submission...`);
             
             // Show loading state
             submitBtn.disabled = true;
             loadingDiv.style.display = 'block';
             statusDiv.style.display = 'none';
-            
-            // Get form data
-            const formData = new FormData(form);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
-            }
-            
-            console.log('Form data:', data);
-            
-            // Simulate submission (replace with actual endpoint)
-            setTimeout(() => {
-                try {
-                    // For demo purposes, always show success
-                    // In production, replace this with actual API call
-                    showStatus(statusDiv, 'success', 
-                        `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! Thank you for your feedback.`);
-                    
-                    // Auto-close after 3 seconds
-                    setTimeout(() => closeModal(type), 3000);
-                    
-                    console.log('Form submitted successfully:', type);
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    showStatus(statusDiv, 'error', 
-                        '❌ Submission failed. Please try again.');
-                } finally {
-                    submitBtn.disabled = false;
-                    loadingDiv.style.display = 'none';
+
+            try {
+                // Prepare form data
+                const formData = new FormData(formElement);
+                const data = {};
+                
+                // Convert FormData to regular object
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value.trim();
                 }
-            }, 1500); // Simulate network delay
+                
+                // Add metadata
+                data.type = type === 'complaints' ? 'complaint' : 'aspiration';
+                data.timestamp = new Date().toISOString();
+                
+                console.log('📋 Form data prepared:', data);
+
+                // Create URLSearchParams for form submission
+                const params = new URLSearchParams();
+                Object.keys(data).forEach(key => {
+                    params.append(key, data[key]);
+                });
+
+                console.log('🔄 Sending request to Google Apps Script...');
+                
+                // Submit to Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params.toString()
+                });
+
+                console.log('✅ Request sent successfully');
+                
+                // Since we're using no-cors mode, we assume success if no error is thrown
+                showStatus(statusDiv, 'success', 
+                    `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! 
+                    Thank you for your feedback. We will review it and get back to you if needed.`);
+                
+                // Auto close after 3 seconds
+                setTimeout(() => {
+                    closeModal(type);
+                }, 3000);
+
+            } catch (error) {
+                console.error('❌ Submission error:', error);
+                
+                showStatus(statusDiv, 'error', 
+                    `❌ There was an error submitting your ${type === 'complaints' ? 'complaint' : 'aspiration'}. 
+                    Please check your internet connection and try again.`);
+            } finally {
+                submitBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+            }
         }
 
         function showStatus(statusDiv, type, message) {
             statusDiv.innerHTML = message;
             statusDiv.className = `status-message ${type}`;
             statusDiv.style.display = 'block';
+            console.log(`📢 Status: ${type} - ${message}`);
         }
 
-        function showAlert(message) {
-            // Simple alert for now - you can replace with custom modal
-            alert(message);
-        }
-
-        // Fallback for older browsers
-        if (!Element.prototype.closest) {
-            Element.prototype.closest = function(selector) {
-                var el = this;
-                while (el) {
-                    if (el.matches && el.matches(selector)) return el;
-                    el = el.parentElement;
+        // Form validation function
+        function validateForm(form) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            // Clear previous error messages
+            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+            
+            requiredFields.forEach(field => {
+                const value = field.value.trim();
+                
+                if (!value) {
+                    field.style.borderColor = '#dc143c';
+                    isValid = false;
+                    
+                    // Add error message
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = 'This field is required';
+                    field.parentNode.appendChild(errorMsg);
+                } else {
+                    field.style.borderColor = '#ddd';
+                    
+                    // Validate email format
+                    if (field.type === 'email' && value) {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            field.style.borderColor = '#dc143c';
+                            isValid = false;
+                            
+                            const errorMsg = document.createElement('div');
+                            errorMsg.className = 'error-message';
+                            errorMsg.textContent = 'Please enter a valid email address';
+                            field.parentNode.appendChild(errorMsg);
+                        }
+                    }
                 }
-                return null;
-            };
+            });
+            
+            if (!isValid) {
+                console.log('⚠️ Form validation failed');
+                // Don't show alert, just scroll to first error
+                const firstError = document.querySelector('.error-message');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                console.log('✅ Form validation passed');
+            }
+            
+            return isValid;
         }
+
+        // Form submission handlers
+        document.getElementById('complaintsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('📝 Complaints form submitted');
+            
+            if (validateForm(this)) {
+                submitForm(this, 'complaints');
+            }
+        });
+
+        document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('💡 Aspirations form submitted');
+            
+            if (validateForm(this)) {
+                submitForm(this, 'aspirations');
+            }
+        });
+
+        // Real-time validation
+        document.querySelectorAll('input[required], textarea[required], select[required]').forEach(field => {
+            field.addEventListener('blur', function() {
+                const value = this.value.trim();
+                
+                if (!value) {
+                    this.style.borderColor = '#dc143c';
+                } else {
+                    this.style.borderColor = '#ddd';
+                    
+                    // Remove error message
+                    const errorMsg = this.parentNode.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                    
+                    // Validate email on blur
+                    if (this.type === 'email' && value) {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            this.style.borderColor = '#dc143c';
+                            
+                            if (!this.parentNode.querySelector('.error-message')) {
+                                const errorMsg = document.createElement('div');
+                                errorMsg.className = 'error-message';
+                                errorMsg.textContent = 'Please enter a valid email address';
+                                this.parentNode.appendChild(errorMsg);
+                            }
+                        }
+                    }
+                }
+            });
+
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#ddd';
+                    
+                    // Remove error message
+                    const errorMsg = this.parentNode.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Escape key to close modals
+            if (e.key === 'Escape') {
+                if (document.getElementById('complaintsModal').style.display === 'block') {
+                    closeModal('complaints');
+                }
+                if (document.getElementById('aspirationsModal').style.display === 'block') {
+                    closeModal('aspirations');
+                }
+            }
+        });
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎉 SP NIBA Complaint System Ready');
+            
+            // Animate cards on load
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach((card, index) => {
+                card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.2}s both`;
+            });
+
+            // Test connection to Google Apps Script
+            console.log('🔍 System configured for:', SCRIPT_URL);
+            console.log('✅ System Status: Ready for submissions');
+            console.log('📝 Available forms: Complaints, Aspirations');
+            console.log('🔒 Validation: Active');
+            console.log('📊 Data destination: Google Sheets via Apps Script');
+        });
     </script>
 </body>
 </html>

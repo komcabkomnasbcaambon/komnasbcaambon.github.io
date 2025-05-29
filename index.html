@@ -312,19 +312,6 @@
             margin-top: 5px;
         }
 
-        .debug-info {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 10px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #666;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -410,7 +397,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('complaints')">&times;</span>
             <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
-            <form id="complaintsForm">
+            <form id="complaintsForm" method="POST" action="YOUR_GOOGLE_APPS_SCRIPT_URL_HERE">
                 <div class="form-group">
                     <label for="complaintName">Full Name: <span style="color: red;">*</span></label>
                     <input type="text" id="complaintName" name="name" required>
@@ -439,12 +426,13 @@
                     <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
                     <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
                 </div>
+                <input type="hidden" name="type" value="complaint">
+                <input type="hidden" name="timestamp" id="complaintTimestamp">
                 <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
                 <div class="loading" id="complaintLoading">
                     <p>📤 Submitting your complaint...</p>
                 </div>
                 <div class="status-message" id="complaintStatus"></div>
-                <div class="debug-info" id="complaintDebug" style="display: none;"></div>
             </form>
         </div>
     </div>
@@ -454,7 +442,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('aspirations')">&times;</span>
             <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
-            <form id="aspirationsForm">
+            <form id="aspirationsForm" method="POST" action="YOUR_GOOGLE_APPS_SCRIPT_URL_HERE">
                 <div class="form-group">
                     <label for="aspirationName">Full Name: <span style="color: red;">*</span></label>
                     <input type="text" id="aspirationName" name="name" required>
@@ -483,323 +471,204 @@
                     <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
                     <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
                 </div>
+                <input type="hidden" name="type" value="aspiration">
+                <input type="hidden" name="timestamp" id="aspirationTimestamp">
                 <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
                 <div class="loading" id="aspirationLoading">
                     <p>💡 Submitting your aspiration...</p>
                 </div>
                 <div class="status-message" id="aspirationStatus"></div>
-                <div class="debug-info" id="aspirationDebug" style="display: none;"></div>
             </form>
         </div>
     </div>
 
     <script>
-    // Configuration
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
-    const DEBUG_MODE = true; // Set to false in production
-
-    // Logging function
-    function log(message, data = null) {
-        const timestamp = new Date().toISOString();
-        console.log(`[${timestamp}] ${message}`, data || '');
+        // SIMPLIFIED SCRIPT - MUCH EASIER TO DEBUG
         
-        if (DEBUG_MODE) {
-            // Also show in debug div if available
-            const debugDivs = document.querySelectorAll('.debug-info');
-            debugDivs.forEach(div => {
-                if (div.style.display !== 'none') {
-                    div.innerHTML += `<div>[${timestamp.split('T')[1].split('.')[0]}] ${message}</div>`;
-                    div.scrollTop = div.scrollHeight;
-                }
+        console.log('🚀 SP NIBA System Initialized');
+
+        // Modal functions
+        function openModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Set timestamp when modal opens
+            const timestamp = new Date().toISOString();
+            document.getElementById(type + 'Timestamp').value = timestamp;
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            document.getElementById(type + 'Form').reset();
+            document.getElementById(type + 'Status').style.display = 'none';
+            document.getElementById(type + 'Loading').style.display = 'none';
+            document.getElementById(type + 'SubmitBtn').disabled = false;
+            
+            // Clear error styling
+            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                field.style.borderColor = '#ddd';
             });
         }
-    }
 
-    log('🚀 SP NIBA System Initialized');
-    log('📡 Script URL configured', SCRIPT_URL);
-
-    function openModal(type) {
-        document.getElementById(type + 'Modal').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        
-        if (DEBUG_MODE) {
-            const debugDiv = document.getElementById(type + 'Debug');
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML = '<div><strong>Debug Log:</strong></div>';
-        }
-        
-        log(`📋 Opened ${type} modal`);
-    }
-
-    function closeModal(type) {
-        document.getElementById(type + 'Modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        // Reset form and status messages
-        const form = document.getElementById(type + 'Form');
-        const statusDiv = document.getElementById(type + 'Status');
-        const loadingDiv = document.getElementById(type + 'Loading');
-        const submitBtn = document.getElementById(type + 'SubmitBtn');
-        const debugDiv = document.getElementById(type + 'Debug');
-        
-        form.reset();
-        statusDiv.style.display = 'none';
-        loadingDiv.style.display = 'none';
-        debugDiv.style.display = 'none';
-        submitBtn.disabled = false;
-        
-        // Clear all error messages
-        document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-        document.querySelectorAll('input, textarea, select').forEach(field => {
-            field.style.borderColor = '#ddd';
-        });
-        
-        log(`❌ Closed ${type} modal`);
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        const complaintsModal = document.getElementById('complaintsModal');
-        const aspirationsModal = document.getElementById('aspirationsModal');
-
-        if (event.target == complaintsModal) {
-            closeModal('complaints');
-        }
-        if (event.target == aspirationsModal) {
-            closeModal('aspirations');
-        }
-    }
-
-    // Enhanced form submission with multiple methods
-    async function submitForm(formElement, type) {
-        const submitBtn = document.getElementById(type + 'SubmitBtn');
-        const loadingDiv = document.getElementById(type + 'Loading');
-        const statusDiv = document.getElementById(type + 'Status');
-        
-        log(`📤 Starting ${type} submission...`);
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        loadingDiv.style.display = 'block';
-        statusDiv.style.display = 'none';
-
-        try {
-            // Prepare form data
-            const formData = new FormData(formElement);
-            const data = {};
-            
-            // Convert FormData to regular object
-            for (let [key, value] of formData.entries()) {
-                data[key] = value.trim();
-            }
-            
-            // Add metadata
-            data.type = type === 'complaints' ? 'complaint' : 'aspiration';
-            data.timestamp = new Date().toISOString();
-            
-            log('📋 Form data prepared', data);
-
-            // Method 1: Try standard form submission
-            const success = await tryFormSubmission(data);
-            
-            if (success) {
-                showStatus(statusDiv, 'success', 
-                    `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! 
-                    Thank you for your feedback. We will review it and get back to you if needed.`);
-                
-                log('✅ Submission successful');
-                
-                // Auto close after 4 seconds
-                setTimeout(() => {
-                    closeModal(type);
-                }, 4000);
-            } else {
-                throw new Error('All submission methods failed');
-            }
-
-        } catch (error) {
-            log('❌ Submission failed', error.message);
-            showStatus(statusDiv, 'error', 
-                `❌ Submission failed. Error: ${error.message}. Please try again or contact support if the problem persists.`);
-        } finally {
-            submitBtn.disabled = false;
-            loadingDiv.style.display = 'none';
-        }
-    }
-
-    // Try multiple submission methods
-    async function tryFormSubmission(data) {
-        const methods = [
-            () => submitAsFormData(data),
-            () => submitAsJson(data),
-            () => submitAsUrlEncoded(data)
-        ];
-
-        for (let i = 0; i < methods.length; i++) {
-            try {
-                log(`🔄 Trying submission method ${i + 1}...`);
-                await methods[i]();
-                log(`✅ Method ${i + 1} successful`);
-                return true;
-            } catch (error) {
-                log(`❌ Method ${i + 1} failed:`, error.message);
-                if (i === methods.length - 1) {
-                    throw error;
-                }
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                if (event.target.id === 'complaintsModal') closeModal('complaints');
+                if (event.target.id === 'aspirationsModal') closeModal('aspirations');
             }
         }
-        return false;
-    }
 
-    // Method 1: Form data submission
-    async function submitAsFormData(data) {
-        const formData = new FormData();
-        for (const [key, value] of Object.entries(data)) {
-            formData.append(key, value);
-        }
-
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors'
-        });
-
-        log('📡 FormData request sent');
-        // With no-cors, we can't read the response, but no error means success
-    }
-
-    // Method 2: JSON submission
-    async function submitAsJson(data) {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            mode: 'no-cors'
-        });
-
-        log('📡 JSON request sent');
-    }
-
-    // Method 3: URL-encoded submission
-    async function submitAsUrlEncoded(data) {
-        const urlEncodedData = new URLSearchParams(data).toString();
-
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: urlEncodedData,
-            mode: 'no-cors'
-        });
-
-        log('📡 URL-encoded request sent');
-    }
-
-    function showStatus(statusDiv, type, message) {
-        statusDiv.innerHTML = message;
-        statusDiv.className = `status-message ${type}`;
-        statusDiv.style.display = 'block';
-        log(`📢 Status: ${type} - ${message}`);
-    }
-
-    // Enhanced form validation
-    function validateForm(form) {
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
-        
-        // Clear previous error messages
-        document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-        
-        requiredFields.forEach(field => {
-            const value = field.value.trim();
+        // Form validation
+        function validateForm(form) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
             
-            if (!value) {
-                field.style.borderColor = '#dc143c';
-                isValid = false;
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+            
+            requiredFields.forEach(field => {
+                const value = field.value.trim();
                 
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'This field is required';
-                field.parentNode.appendChild(errorMsg);
-            } else {
-                field.style.borderColor = '#ddd';
-                
-                // Validate email format
-                if (field.type === 'email' && value) {
+                if (!value) {
+                    showFieldError(field, 'This field is required');
+                    isValid = false;
+                } else if (field.type === 'email') {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(value)) {
-                        field.style.borderColor = '#dc143c';
+                        showFieldError(field, 'Please enter a valid email address');
                         isValid = false;
-                        
-                        const errorMsg = document.createElement('div');
-                        errorMsg.className = 'error-message';
-                        errorMsg.textContent = 'Please enter a valid email address';
-                        field.parentNode.appendChild(errorMsg);
                     }
+                }
+            });
+            
+            return isValid;
+        }
+
+        function showFieldError(field, message) {
+            field.style.borderColor = '#dc143c';
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            field.parentNode.appendChild(errorDiv);
+        }
+
+        function showStatus(statusDiv, type, message) {
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        // Handle form submissions
+        document.getElementById('complaintsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm(this)) {
+                alert('Please fill in all required fields correctly');
+                return;
+            }
+            
+            submitForm(this, 'complaints');
+        });
+
+        document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm(this)) {
+                alert('Please fill in all required fields correctly');
+                return;
+            }
+            
+            submitForm(this, 'aspirations');
+        });
+
+        // Simplified form submission
+        function submitForm(form, type) {
+            const submitBtn = document.getElementById(type + 'SubmitBtn');
+            const loadingDiv = document.getElementById(type + 'Loading');
+            const statusDiv = document.getElementById(type + 'Status');
+            
+            // Show loading
+            submitBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            statusDiv.style.display = 'none';
+            
+            // Get form data
+            const formData = new FormData(form);
+            
+            // Try to submit using fetch
+            const scriptUrl = form.action;
+            
+            if (!scriptUrl || scriptUrl.includes('YOUR_GOOGLE_APPS_SCRIPT_URL_HERE')) {
+                // Fallback - show instructions
+                submitBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+                showStatus(statusDiv, 'error', 
+                    '⚠️ Please update the Google Apps Script URL in the form action attribute. ' +
+                    'Replace "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE" with your actual script URL.');
+                return;
+            }
+            
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Required for Google Apps Script
+            })
+            .then(() => {
+                // Success (no-cors mode doesn't allow reading response)
+                showStatus(statusDiv, 'success', 
+                    `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! Thank you for your feedback.`);
+                
+                // Auto-close after 3 seconds
+                setTimeout(() => closeModal(type), 3000);
+            })
+            .catch(error => {
+                console.error('Submission error:', error);
+                showStatus(statusDiv, 'error', 
+                    '❌ Submission failed. Please check your internet connection and try again.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+            });
+        }
+
+        // Real-time field validation
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#ddd';
+                    const errorMsg = this.parentNode.querySelector('.error-message');
+                    if (errorMsg) errorMsg.remove();
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('complaintsModal').style.display === 'block') {
+                    closeModal('complaints');
+                }
+                if (document.getElementById('aspirationsModal').style.display === 'block') {
+                    closeModal('aspirations');
                 }
             }
         });
-        
-        if (!isValid) {
-            log('⚠️ Form validation failed');
-            alert('⚠️ Please fill in all required fields correctly');
-        } else {
-            log('✅ Form validation passed');
-        }
-        
-        return isValid;
-    }
 
-    // Test connection function
-    async function testConnection() {
-        log('🔍 Testing connection to Google Apps Script...');
-        
-        try {
-            const testData = {
-                type: 'test',
-                name: 'Test User',
-                email: 'test@example.com',
-                description: 'Connection test',
-                timestamp: new Date().toISOString()
-            };
-
-            await submitAsFormData(testData);
-            log('✅ Connection test successful');
-            return true;
-        } catch (error) {
-            log('❌ Connection test failed', error.message);
-            return false;
-        }
-    }
-
-    // Form submission handlers
-    document.getElementById('complaintsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        log('📝 Complaints form submitted');
-        
-        if (validateForm(this)) {
-            submitForm(this, 'complaints');
-        }
-    });
-
-    document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        log('💡 Aspirations form submitted');
-        
-        if (validateForm(this)) {
-            submitForm(this, 'aspirations');
-        }
-    });
-
-    // Real-time validation
-    document.querySelectorAll('input[required], textarea[required], select[required]').forEach(field => {
-        field.addEventListener('blur', function() {
-            const value = this.value.trim();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ System ready');
             
-            if (!value) {
-                this.style.borderColor = '#dc143c';
-            } else {
-                this
+            // Animate cards
+            document.querySelectorAll('.option-card').forEach((card, index) => {
+                card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.2}s both`;
+            });
+        });
+    </script>
+</body>
+</html>

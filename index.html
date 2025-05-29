@@ -487,264 +487,93 @@
             </form>
         </div>
     </div>
-
-    <!-- Hidden iframe for form submission -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
+    
     <script>
-        // Configuration
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
 
-        // Initialize the application
-        function init() {
-            console.log('🚀 SP NIBA Complaint System Initialized');
-            setupEventListeners();
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('complaintsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmit('complaints');
+      });
 
-        // Setup all event listeners
-        function setupEventListeners() {
-            // Form submissions
-            document.getElementById('complaintsForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                handleFormSubmit('complaints');
-            });
+      document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmit('aspirations');
+      });
+    });
 
-            document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                handleFormSubmit('aspirations');
-            });
+    function handleFormSubmit(type) {
+      const form = document.getElementById(`${type}Form`);
+      const formData = new FormData(form);
+      formData.append('type', type === 'complaints' ? 'complaint' : 'aspiration');
+      formData.append('timestamp', new Date().toISOString());
 
-            // Modal close on outside click
-            window.addEventListener('click', function(event) {
-                if (event.target.classList.contains('modal')) {
-                    const modalId = event.target.id;
-                    const type = modalId.replace('Modal', '');
-                    closeModal(type);
-                }
-            });
+      const submitBtn = document.getElementById(`${type}SubmitBtn`);
+      const loadingDiv = document.getElementById(`${type}Loading`);
+      const statusDiv = document.getElementById(`${type}Status`);
 
-            // Real-time email validation
-            document.getElementById('complaintEmail').addEventListener('blur', function() {
-                validateEmail(this, 'complaintEmailError');
-            });
+      submitBtn.disabled = true;
+      loadingDiv.style.display = 'block';
+      statusDiv.style.display = 'none';
 
-            document.getElementById('aspirationEmail').addEventListener('blur', function() {
-                validateEmail(this, 'aspirationEmailError');
-            });
-        }
+      const urlEncoded = new URLSearchParams();
+      for (let [key, value] of formData.entries()) {
+        urlEncoded.append(key, value);
+      }
 
-        // Open modal function
-        function openModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                console.log(`📋 Opened ${type} modal`);
-            }
-        }
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: urlEncoded
+      })
+      .then(() => {
+        showSuccess(type);
+      })
+      .catch(error => {
+        console.error('Submission error:', error);
+        showError(type, 'There was an error submitting your form. Please try again.');
+      });
+    }
 
-        // Close modal function
-        function closeModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                
-                // Reset form
-                resetForm(type);
-                console.log(`❌ Closed ${type} modal`);
-            }
-        }
+    function showSuccess(type) {
+      const submitBtn = document.getElementById(`${type}SubmitBtn`);
+      const loadingDiv = document.getElementById(`${type}Loading`);
+      const statusDiv = document.getElementById(`${type}Status`);
 
-        // Reset form function
-        function resetForm(type) {
-            const form = document.getElementById(type + 'Form');
-            const statusDiv = document.getElementById(type + 'Status');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            
-            if (form) form.reset();
-            if (statusDiv) statusDiv.style.display = 'none';
-            if (loadingDiv) loadingDiv.style.display = 'none';
-            if (submitBtn) submitBtn.disabled = false;
-            
-            // Clear all error messages and styles
-            clearErrors(type);
-        }
+      submitBtn.disabled = false;
+      loadingDiv.style.display = 'none';
 
-        // Clear error messages and styles
-        function clearErrors(type) {
-            const form = document.getElementById(type + 'Form');
-            const errorElements = form.querySelectorAll('.error-message');
-            const inputElements = form.querySelectorAll('input, textarea, select');
-            
-            errorElements.forEach(error => {
-                error.textContent = '';
-                error.style.display = 'none';
-            });
-            
-            inputElements.forEach(input => {
-                input.style.borderColor = '#ddd';
-            });
-        }
+      statusDiv.innerHTML = `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully!`;
+      statusDiv.className = 'status-message success';
+      statusDiv.style.display = 'block';
 
-        // Validate email function
-        function validateEmail(emailField, errorId) {
-            const email = emailField.value.trim();
-            const errorElement = document.getElementById(errorId);
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (email && !emailRegex.test(email)) {
-                showFieldError(emailField, errorElement, 'Please enter a valid email address');
-                return false;
-            } else {
-                clearFieldError(emailField, errorElement);
-                return true;
-            }
-        }
+      setTimeout(() => closeModal(type), 3000);
+    }
 
-        // Show field error
-        function showFieldError(field, errorElement, message) {
-            field.style.borderColor = '#dc143c';
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
+    function showError(type, message) {
+      const submitBtn = document.getElementById(`${type}SubmitBtn`);
+      const loadingDiv = document.getElementById(`${type}Loading`);
+      const statusDiv = document.getElementById(`${type}Status`);
 
-        // Clear field error
-        function clearFieldError(field, errorElement) {
-            field.style.borderColor = '#ddd';
-            errorElement.textContent = '';
-            errorElement.style.display = 'none';
-        }
+      submitBtn.disabled = false;
+      loadingDiv.style.display = 'none';
 
-        // Validate form function
-        function validateForm(type) {
-            const form = document.getElementById(type + 'Form');
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-            
-            // Clear previous errors
-            clearErrors(type);
-            
-            requiredFields.forEach(field => {
-                const value = field.value.trim();
-                const fieldName = field.name;
-                const errorId = type + fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + 'Error';
-                const errorElement = document.getElementById(errorId);
-                
-                if (!value) {
-                    showFieldError(field, errorElement, 'This field is required');
-                    isValid = false;
-                } else if (field.type === 'email') {
-                    const emailValid = validateEmail(field, errorId);
-                    if (!emailValid) isValid = false;
-                }
-            });
-            
-            return isValid;
-        }
+      statusDiv.innerHTML = `❌ ${message}`;
+      statusDiv.className = 'status-message error';
+      statusDiv.style.display = 'block';
+    }
 
-        // Handle form submission
-        function handleFormSubmit(type) {
-            console.log(`📤 Submitting ${type} form...`);
-            
-            // Validate form
-            if (!validateForm(type)) {
-                console.log('⚠️ Form validation failed');
-                return;
-            }
-            
-            const form = document.getElementById(type + 'Form');
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            loadingDiv.style.display = 'block';
-            statusDiv.style.display = 'none';
-            
-            // Prepare form data
-            const formData = new FormData(form);
-            formData.append('type', type === 'complaints' ? 'complaint' : 'aspiration');
-            formData.append('timestamp', new Date().toISOString());
-            
-            // Submit using hidden form method (most reliable for Google Apps Script)
-            submitToGoogleScript(formData, type);
-        }
-
-        // Submit to Google Script using hidden form
-        function submitToGoogleScript(formData, type) {
-            try {
-                // Create hidden form
-                const hiddenForm = document.createElement('form');
-                hiddenForm.method = 'POST';
-                hiddenForm.action = SCRIPT_URL;
-                hiddenForm.target = 'hidden_iframe';
-                hiddenForm.style.display = 'none';
-                
-                // Add all form data as hidden inputs
-                for (let [key, value] of formData.entries()) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = value;
-                    hiddenForm.appendChild(input);
-                }
-                
-                document.body.appendChild(hiddenForm);
-                
-                // Submit form
-                hiddenForm.submit();
-                console.log('📤 Form submitted to Google Apps Script');
-                
-                // Show success message after short delay
-                setTimeout(() => {
-                    showSuccess(type);
-                    document.body.removeChild(hiddenForm);
-                }, 2000);
-                
-            } catch (error) {
-                console.error('❌ Submission error:', error);
-                showError(type, 'There was an error submitting your form. Please try again.');
-            }
-        }
-
-        // Show success message
-        function showSuccess(type) {
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
-            
-            submitBtn.disabled = false;
-            loadingDiv.style.display = 'none';
-            
-            statusDiv.innerHTML = `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! Thank you for your feedback. We will review it and get back to you if needed.`;
-            statusDiv.className = 'status-message success';
-            statusDiv.style.display = 'block';
-            
-            // Auto close modal after 3 seconds
-            setTimeout(() => {
-                closeModal(type);
-            }, 3000);
-        }
-
-        // Show error message
-        function showError(type, message) {
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
-            
-            submitBtn.disabled = false;
-            loadingDiv.style.display = 'none';
-            
-            statusDiv.innerHTML = `❌ ${message}`;
-            statusDiv.className = 'status-message error';
-            statusDiv.style.display = 'block';
-        }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    function closeModal(type) {
+      const modal = document.getElementById(`${type}Modal`);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        document.getElementById(`${type}Form`).reset();
+      }
+    }
+  </script>
 </body>
 </html>

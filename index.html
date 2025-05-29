@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https://script.google.com; connect-src 'self' https://script.google.com;">
     <title>SP NIBA BCA - Complaints & Aspirations</title>
     <style>
         * {
@@ -501,229 +502,70 @@
             SUBMIT_TIMEOUT: 15000, // 15 seconds
             AUTO_CLOSE_DELAY: 3000 // 3 seconds
         };
-
-        // Application state
-        let currentSubmission = null;
-
-        // Initialize the application
-        function init() {
+    
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 SP NIBA Complaint System Initialized');
             setupEventListeners();
-        }
-
+        });
+    
         // Setup all event listeners
         function setupEventListeners() {
             // Modal triggers
             document.getElementById('complaintsCard').addEventListener('click', () => openModal('complaints'));
             document.getElementById('aspirationsCard').addEventListener('click', () => openModal('aspirations'));
-
+    
             // Modal close buttons
             document.querySelectorAll('.close').forEach(closeBtn => {
                 closeBtn.addEventListener('click', (e) => {
                     const modal = e.target.closest('.modal');
-                    const type = modal.id.replace('Modal', '');
-                    closeModal(type);
+                    closeModal(modal.id.replace('Modal', ''));
                 });
             });
-
+    
             // Form submissions
-            document.getElementById('complaintsForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                handleFormSubmit('complaints');
-            });
-
-            document.getElementById('aspirationsForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                handleFormSubmit('aspirations');
-            });
-
+            document.getElementById('complaintsForm').addEventListener('submit', handleSubmit);
+            document.getElementById('aspirationsForm').addEventListener('submit', handleSubmit);
+    
             // Modal close on outside click
             window.addEventListener('click', (event) => {
                 if (event.target.classList.contains('modal')) {
-                    const modalId = event.target.id;
-                    const type = modalId.replace('Modal', '');
-                    closeModal(type);
+                    closeModal(event.target.id.replace('Modal', ''));
                 }
             });
-
+    
             // Escape key to close modal
             window.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') {
                     const openModal = document.querySelector('.modal[style*="block"]');
                     if (openModal) {
-                        const type = openModal.id.replace('Modal', '');
-                        closeModal(type);
+                        closeModal(openModal.id.replace('Modal', ''));
                     }
                 }
             });
-
-            // Real-time email validation
-            document.getElementById('complaintEmail').addEventListener('blur', function() {
-                validateEmail(this, 'complaintEmailError');
-            });
-
-            document.getElementById('aspirationEmail').addEventListener('blur', function() {
-                validateEmail(this, 'aspirationEmailError');
-            });
+    
+            // Real-time validation
+            document.getElementById('complaintEmail').addEventListener('blur', validateEmailField);
+            document.getElementById('aspirationEmail').addEventListener('blur', validateEmailField);
             
-            // Handle iframe load event
-            document.getElementById('hidden_iframe').addEventListener('load', function() {
-                if (currentSubmission) {
-                    console.log('📨 Iframe response received');
-                    setTimeout(() => {
-                        if (currentSubmission) {
-                            showSuccess(currentSubmission.type);
-                        }
-                    }, 1000);
-                }
-            });
+            // Iframe load handler
+            document.getElementById('hidden_iframe').addEventListener('load', handleIframeResponse);
         }
-
-        // Open modal function
-        function openModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                
-                // Focus on first input
-                const firstInput = modal.querySelector('input[type="text"]');
-                if (firstInput) {
-                    setTimeout(() => firstInput.focus(), 100);
-                }
-                
-                console.log(`📋 Opened ${type} modal`);
-            }
-        }
-
-        // Close modal function
-        function closeModal(type) {
-            const modal = document.getElementById(type + 'Modal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                
-                // Reset form
-                resetForm(type);
-                console.log(`❌ Closed ${type} modal`);
-            }
-        }
-
-        // Reset form function
-        function resetForm(type) {
-            const form = document.getElementById(type + 'Form');
-            const statusDiv = document.getElementById(type + 'Status');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            
-            if (form) form.reset();
-            if (statusDiv) statusDiv.style.display = 'none';
-            if (loadingDiv) loadingDiv.style.display = 'none';
-            if (submitBtn) submitBtn.disabled = false;
-            
-            // Clear all error messages and styles
-            clearErrors(type);
-        }
-
-        // Clear error messages and styles
-        function clearErrors(type) {
-            const form = document.getElementById(type + 'Form');
-            if (!form) return;
-            
-            const errorElements = form.querySelectorAll('.error-message');
-            const inputElements = form.querySelectorAll('input, textarea, select');
-            
-            errorElements.forEach(error => {
-                error.textContent = '';
-                error.style.display = 'none';
-            });
-            
-            inputElements.forEach(input => {
-                input.style.borderColor = '#ddd';
-            });
-        }
-
-        // Validate email function
-        function validateEmail(emailField, errorId) {
-            const email = emailField.value.trim();
-            const errorElement = document.getElementById(errorId);
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (email && !emailRegex.test(email)) {
-                showFieldError(emailField, errorElement, 'Please enter a valid email address');
-                return false;
-            } else {
-                clearFieldError(emailField, errorElement);
-                return true;
-            }
-        }
-
-        // Show field error
-        function showFieldError(field, errorElement, message) {
-            if (field) field.style.borderColor = '#dc143c';
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-            }
-        }
-
-        // Clear field error
-        function clearFieldError(field, errorElement) {
-            if (field) field.style.borderColor = '#ddd';
-            if (errorElement) {
-                errorElement.textContent = '';
-                errorElement.style.display = 'none';
-            }
-        }
-
-        // Validate form function
-        function validateForm(type) {
-            const form = document.getElementById(type + 'Form');
-            if (!form) return false;
-            
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-            
-            // Clear previous errors
-            clearErrors(type);
-            
-            requiredFields.forEach(field => {
-                const value = field.value.trim();
-                const fieldName = field.name;
-                const errorId = type + fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + 'Error';
-                const errorElement = document.getElementById(errorId);
-                
-                if (!value) {
-                    showFieldError(field, errorElement, 'This field is required');
-                    isValid = false;
-                } else if (field.type === 'email') {
-                    const emailValid = validateEmail(field, errorId);
-                    if (!emailValid) isValid = false;
-                }
-            });
-            
-            return isValid;
-        }
-
+    
         // Handle form submission
-        function handleFormSubmit(type) {
-            console.log(`📤 Attempting to submit ${type} form...`);
+        function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const type = form.id.replace('Form', '');
             
-            // Validate form
-            if (!validateForm(type)) {
+            if (!validateForm(form)) {
                 console.log('⚠️ Form validation failed');
                 return;
             }
             
-            const form = document.getElementById(type + 'Form');
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
-            
-            if (!form || !submitBtn || !loadingDiv || !statusDiv) {
-                console.error('❌ Missing form elements');
-                return;
-            }
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const loadingDiv = document.getElementById(`${type}Loading`);
+            const statusDiv = document.getElementById(`${type}Status`);
             
             // Show loading state
             submitBtn.disabled = true;
@@ -735,129 +577,210 @@
             formData.append('type', type === 'complaints' ? 'complaint' : 'aspiration');
             formData.append('timestamp', new Date().toISOString());
             
-            // Store current submission info
-            currentSubmission = { type, startTime: Date.now() };
-            
-            // Try multiple submission methods
+            // Submit with multiple fallback methods
             submitWithMultipleMethods(formData, type);
         }
-
-        // Submit with multiple methods for better reliability
+    
+        // Submit with multiple methods for reliability
         async function submitWithMultipleMethods(formData, type) {
-            let success = false;
-            
-            // Method 1: Modern fetch with CORS handling
+            // Method 1: Fetch API (modern approach)
             try {
                 console.log('🔹 Trying fetch method...');
                 const response = await fetch(CONFIG.SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Important for Google Apps Script
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                     body: new URLSearchParams(formData)
                 });
                 
-                // With no-cors, we can't read the response, so assume success if no error
-                console.log('✅ Fetch method completed');
-                success = true;
-                
+                // With no-cors we can't read response, so assume success
+                console.log('✅ Fetch request sent');
+                showSuccess(type);
+                return;
             } catch (error) {
                 console.log('❌ Fetch method failed:', error.message);
             }
-            
-            // If fetch didn't work, try hidden form method
-            if (!success) {
-                try {
-                    console.log('🔹 Trying hidden form method...');
-                    submitViaHiddenForm(formData, type);
-                    success = true;
-                } catch (error) {
-                    console.log('❌ Hidden form method failed:', error.message);
+    
+            // Method 2: Hidden form (fallback)
+            try {
+                console.log('🔹 Trying hidden form method...');
+                const hiddenForm = document.createElement('form');
+                hiddenForm.method = 'POST';
+                hiddenForm.action = CONFIG.SCRIPT_URL;
+                hiddenForm.target = 'hidden_iframe';
+                hiddenForm.style.display = 'none';
+    
+                for (let [key, value] of formData.entries()) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    hiddenForm.appendChild(input);
                 }
-            }
-            
-            // Set timeout for success assumption
-            setTimeout(() => {
-                if (currentSubmission && currentSubmission.type === type) {
-                    console.log('⏰ Assuming submission success after timeout');
-                    showSuccess(type);
-                }
-            }, 3000); // Assume success after 3 seconds
-            
-            // Fallback timeout
-            setTimeout(() => {
-                if (currentSubmission && currentSubmission.type === type) {
-                    console.log('⏰ Submission timeout reached');
-                    showError(type, 'Submission is taking longer than expected. Your form may have been submitted successfully.');
-                }
-            }, CONFIG.SUBMIT_TIMEOUT);
-        }
-
-        // Submit via hidden form (fallback method)
-        function submitViaHiddenForm(formData, type) {
-            const hiddenForm = document.createElement('form');
-            hiddenForm.method = 'POST';
-            hiddenForm.action = CONFIG.SCRIPT_URL;
-            hiddenForm.target = 'hidden_iframe';
-            hiddenForm.style.display = 'none';
-            
-            // Add all form data as hidden inputs
-            for (let [key, value] of formData.entries()) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                hiddenForm.appendChild(input);
-            }
-            
-            document.body.appendChild(hiddenForm);
-            hiddenForm.submit();
-            
-            // Clean up
-            setTimeout(() => {
-                if (document.body.contains(hiddenForm)) {
+    
+                document.body.appendChild(hiddenForm);
+                hiddenForm.submit();
+                
+                // Set timeout to handle iframe response
+                setTimeout(() => {
+                    if (document.getElementById(`${type}Loading`).style.display === 'block') {
+                        showSuccess(type);
+                    }
                     document.body.removeChild(hiddenForm);
-                }
-            }, 5000);
+                }, 2000);
+                
+            } catch (error) {
+                console.log('❌ Hidden form method failed:', error.message);
+                showError(type, 'Failed to submit. Please try again later.');
+            }
         }
-
-        // Show success message
-        function showSuccess(type) {
-            if (!currentSubmission || currentSubmission.type !== type) return;
+    
+        // Handle iframe response
+        function handleIframeResponse() {
+            const openModal = document.querySelector('.modal[style*="block"]');
+            if (openModal) {
+                const type = openModal.id.replace('Modal', '');
+                showSuccess(type);
+            }
+        }
+    
+        // Form validation
+        function validateForm(form) {
+            let isValid = true;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
+            // Clear previous errors
+            form.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
             
-            if (submitBtn) submitBtn.disabled = false;
+            // Validate required fields
+            form.querySelectorAll('[required]').forEach(field => {
+                const errorId = `${field.id}Error`;
+                const errorElement = document.getElementById(errorId);
+                
+                if (!field.value.trim()) {
+                    showFieldError(field, errorElement, 'This field is required');
+                    isValid = false;
+                } else if (field.type === 'email' && !emailRegex.test(field.value.trim())) {
+                    showFieldError(field, errorElement, 'Please enter a valid email');
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+    
+        // Email field validation
+        function validateEmailField(e) {
+            const field = e.target;
+            const errorId = `${field.id}Error`;
+            const errorElement = document.getElementById(errorId);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (field.value.trim() && !emailRegex.test(field.value.trim())) {
+                showFieldError(field, errorElement, 'Please enter a valid email');
+            } else {
+                clearFieldError(field, errorElement);
+            }
+        }
+    
+        // Show field error
+        function showFieldError(field, errorElement, message) {
+            field.style.borderColor = '#dc143c';
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+    
+        // Clear field error
+        function clearFieldError(field, errorElement) {
+            field.style.borderColor = '#ddd';
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+        }
+    
+        // Modal functions
+        function openModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Focus on first input
+                const firstInput = modal.querySelector('input[type="text"]');
+                if (firstInput) setTimeout(() => firstInput.focus(), 100);
+                
+                console.log(`📋 Opened ${type} modal`);
+            }
+        }
+    
+        function closeModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                resetForm(type);
+                console.log(`❌ Closed ${type} modal`);
+            }
+        }
+    
+        function resetForm(type) {
+            const form = document.getElementById(`${type}Form`);
+            const statusDiv = document.getElementById(`${type}Status`);
+            const loadingDiv = document.getElementById(`${type}Loading`);
+            const submitBtn = document.getElementById(`${type}SubmitBtn`);
+            
+            if (form) form.reset();
+            if (statusDiv) statusDiv.style.display = 'none';
             if (loadingDiv) loadingDiv.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = false;
+            
+            // Clear errors
+            form.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+            
+            form.querySelectorAll('input, textarea, select').forEach(el => {
+                el.style.borderColor = '#ddd';
+            });
+        }
+    
+        // Status messages
+        function showSuccess(type) {
+            const loadingDiv = document.getElementById(`${type}Loading`);
+            const statusDiv = document.getElementById(`${type}Status`);
+            const submitBtn = document.getElementById(`${type}SubmitBtn`);
+            
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = false;
             
             if (statusDiv) {
-                statusDiv.innerHTML = `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! Thank you for your feedback. We will review it and get back to you if needed.`;
+                statusDiv.innerHTML = `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully!`;
                 statusDiv.className = 'status-message success';
                 statusDiv.style.display = 'block';
             }
             
             console.log(`✅ ${type} submission successful`);
-            currentSubmission = null;
             
             // Auto close modal after delay
-            setTimeout(() => {
-                closeModal(type);
-            }, CONFIG.AUTO_CLOSE_DELAY);
+            setTimeout(() => closeModal(type), CONFIG.AUTO_CLOSE_DELAY);
         }
-
-        // Show error message
+    
         function showError(type, message) {
-            if (!currentSubmission || currentSubmission.type !== type) return;
+            const loadingDiv = document.getElementById(`${type}Loading`);
+            const statusDiv = document.getElementById(`${type}Status`);
+            const submitBtn = document.getElementById(`${type}SubmitBtn`);
             
-            const submitBtn = document.getElementById(type + 'SubmitBtn');
-            const loadingDiv = document.getElementById(type + 'Loading');
-            const statusDiv = document.getElementById(type + 'Status');
-            
-            if (submitBtn) submitBtn.disabled = false;
             if (loadingDiv) loadingDiv.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = false;
             
             if (statusDiv) {
                 statusDiv.innerHTML = `❌ ${message}`;
@@ -866,11 +789,7 @@
             }
             
             console.log(`❌ ${type} submission error:`, message);
-            currentSubmission = null;
         }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

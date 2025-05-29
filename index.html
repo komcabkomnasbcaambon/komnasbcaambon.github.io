@@ -489,12 +489,24 @@
 
         // Modal functions
         function openModal(type) {
-            document.getElementById(type + 'Modal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            console.log('Opening modal:', type);
+            const modal = document.getElementById(type + 'Modal');
+            console.log('Modal element:', modal);
             
-            // Set timestamp when modal opens
-            const timestamp = new Date().toISOString();
-            document.getElementById(type + 'Timestamp').value = timestamp;
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Set timestamp when modal opens
+                const timestamp = new Date().toISOString();
+                const timestampField = document.getElementById(type + 'Timestamp');
+                if (timestampField) {
+                    timestampField.value = timestamp;
+                }
+                console.log('Modal opened successfully');
+            } else {
+                console.error('Modal not found:', type + 'Modal');
+            }
         }
 
         function closeModal(type) {

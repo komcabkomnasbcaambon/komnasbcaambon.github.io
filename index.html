@@ -522,6 +522,8 @@
         urlEncoded.append(key, value);
       }
 
+      console.log('🚀 Sending data to Google Apps Script:', Object.fromEntries(formData.entries()));
+
       fetch(SCRIPT_URL, {
         method: 'POST',
         headers: {
@@ -530,15 +532,18 @@
         body: urlEncoded
       })
       .then(() => {
+        console.log('✅ Submission successful');
         showSuccess(type);
       })
       .catch(error => {
-        console.error('Submission error:', error);
+        console.error('❌ Submission error:', error);
         showError(type, 'There was an error submitting your form. Please try again.');
       });
     }
 
     function showSuccess(type) {
+      alert(`${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully!`);
+
       const submitBtn = document.getElementById(`${type}SubmitBtn`);
       const loadingDiv = document.getElementById(`${type}Loading`);
       const statusDiv = document.getElementById(`${type}Status`);
@@ -554,6 +559,8 @@
     }
 
     function showError(type, message) {
+      alert(`Error: ${message}`);
+
       const submitBtn = document.getElementById(`${type}SubmitBtn`);
       const loadingDiv = document.getElementById(`${type}Loading`);
       const statusDiv = document.getElementById(`${type}Status`);

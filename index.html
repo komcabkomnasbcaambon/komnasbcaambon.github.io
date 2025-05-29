@@ -392,7 +392,7 @@
       <span class="close" id="complaintsClose">&times;</span>
       <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
       <form id="complaintsForm">
-        <!-- form groups -->
+        <!-- include form fields here -->
         <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
         <div class="loading" id="complaintLoading"><div class="spinner"></div><p>Submitting your complaint...</p></div>
         <div class="status-message" id="complaintStatus"></div>
@@ -406,7 +406,7 @@
       <span class="close" id="aspirationsClose">&times;</span>
       <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
       <form id="aspirationsForm">
-        <!-- form groups -->
+        <!-- include form fields here -->
         <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
         <div class="loading" id="aspirationLoading"><div class="spinner"></div><p>Submitting your aspiration...</p></div>
         <div class="status-message" id="aspirationStatus"></div>
@@ -427,20 +427,21 @@
       document.getElementById('aspirationsClose').addEventListener('click', () => closeModal('aspirations'));
       window.addEventListener('click', e => {
         if (e.target.classList.contains('modal')) {
-          closeModal('complaints');
-          closeModal('aspirations');
+          ['complaints','aspirations'].forEach(closeModal);
         }
       });
       window.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          closeModal('complaints');
-          closeModal('aspirations');
-        }
+        if (e.key === 'Escape') ['complaints','aspirations'].forEach(closeModal);
       });
 
-      // Form submissions
-      setupForm('complaints');
-      setupForm('aspirations');
+      // Form setup
+      ['complaints','aspirations'].forEach(type => {
+        const form = document.getElementById(`${type}Form`);
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+          handleFormSubmit(type);
+        });
+      });
     });
 
     function openModal(type) {
@@ -452,57 +453,50 @@
       document.getElementById(`${type}Modal`).style.display = 'none';
       document.body.style.overflow = 'auto';
       document.getElementById(`${type}Form`).reset();
-      document.getElementById(`${type}Status`).style.display = 'none';
-    }
-
-    function setupForm(type) {
-      const form = document.getElementById(`${type}Form`);
-      form.addEventListener('submit', e => {
-        e.preventDefault();
-        handleFormSubmit(type);
-      });
+      document.getElementById(`${type === 'complaints' ? 'complaintStatus' : 'aspirationStatus'}`).style.display = 'none';
     }
 
     function handleFormSubmit(type) {
+      const singular = type === 'complaints' ? 'complaint' : 'aspiration';
       const form = document.getElementById(`${type}Form`);
       const formData = new FormData(form);
-      formData.append('type', type === 'complaints' ? 'complaint' : 'aspiration');
+      formData.append('type', singular);
       formData.append('timestamp', new Date().toISOString());
 
-      const submitBtn = document.getElementById(`${type === 'complaints' ? 'complaintSubmitBtn' : 'aspirationSubmitBtn'} `);
-      const loadingDiv = document.getElementById(`${type}Loading`);
-      const statusDiv = document.getElementById(`${type}Status`);
+      const submitBtn = document.getElementById(`${singular}SubmitBtn`);
+      const loadingDiv = document.getElementById(`${singular}Loading`);
+      const statusDiv = document.getElementById(`${singular}Status`);
 
       submitBtn.disabled = true;
       loadingDiv.style.display = 'block';
       statusDiv.style.display = 'none';
 
       const urlEncoded = new URLSearchParams();
-      for (let [key,value] of formData.entries()) urlEncoded.append(key,value);
+      for (let [key, value] of formData.entries()) urlEncoded.append(key, value);
 
-      console.log('Sending', type, Object.fromEntries(formData.entries()));
-
-      fetch(SCRIPT_URL, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:urlEncoded })
-        .then(res => res.json())
-        .then(data => {
-          console.log('Response', data);
-          showStatus(type, data.status==='success', data.message);
-        }).catch(err => {
-          console.error('Error', err);
-          showStatus(type,false,'Submission failed');
-        });
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: urlEncoded
+      })
+      .then(res => res.json())
+      .then(data => showStatus(singular, data.status==='success', data.message))
+      .catch(err => showStatus(singular, false, 'Submission failed'));
     }
 
-    function showStatus(type,success,message) {
-      const submitBtn = document.getElementById(`${type === 'complaints' ? 'complaintSubmitBtn' : 'aspirationSubmitBtn'}`);
-      const loadingDiv = document.getElementById(`${type}Loading`);
-      const statusDiv = document.getElementById(`${type}Status`);
+    function showStatus(singular, success, message) {
+      const submitBtn = document.getElementById(`${singular}SubmitBtn`);
+      const loadingDiv = document.getElementById(`${singular}Loading`);
+      const statusDiv = document.getElementById(`${singular}Status`);
+
       submitBtn.disabled = false;
       loadingDiv.style.display = 'none';
-      statusDiv.innerText = (success? '✅ ' : '❌ ') + message;
-      statusDiv.className = 'status-message ' + (success? 'success':'error');
+
+      statusDiv.innerText = (success ? '✅ ' : '❌ ') + message;
+      statusDiv.className = 'status-message ' + (success ? 'success' : 'error');
       statusDiv.style.display = 'block';
-      if(success) setTimeout(()=>closeModal(type),3000);
+
+      if (success) setTimeout(() => closeModal(singular==='complaint'?'complaints':'aspirations'), 3000);
     }
   </script>
 </body>

@@ -358,160 +358,109 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>BCA AMBON</h1>
-            <h1>KOMCAB KOMNAS SP NIBA</h1>
-            <p>Komite Cabang - We value your feedback and aspirations for continuous improvement</p>
-        </div>
-
-        <div class="main-content">
-            <div class="option-card complaints-card" onclick="openModal('complaints')">
-                <div class="card-icon complaints-icon">⚠️</div>
-                <h2 class="card-title complaints-title">Submit Complaint</h2>
-                <p class="card-description">
-                    Have an issue or concern? Let us know about any problems you've experienced. 
-                    Your feedback helps us improve our services and resolve issues promptly.
-                </p>
-                <button class="card-button complaints-button">File Complaint</button>
-            </div>
-
-            <div class="option-card aspirations-card" onclick="openModal('aspirations')">
-                <div class="card-icon aspirations-icon">💡</div>
-                <h2 class="card-title aspirations-title">Share Aspiration</h2>
-                <p class="card-description">
-                    Have ideas for improvement? Share your suggestions and aspirations with us. 
-                    We value your input in making our organization better for everyone.
-                </p>
-                <button class="card-button">Share Ideas</button>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>BCA AMBON</h1>
+      <h1>KOMCAB KOMNAS SP NIBA</h1>
+      <p>Komite Cabang - We value your feedback and aspirations for continuous improvement</p>
     </div>
 
-    <!-- Complaints Modal -->
-    <div id="complaintsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('complaints')">&times;</span>
-            <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
-            <form id="complaintsForm">
-                <div class="form-group">
-                    <label for="complaintName">Full Name: <span style="color: red;">*</span></label>
-                    <input type="text" id="complaintName" name="name" required>
-                    <div class="error-message" id="complaintNameError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="complaintEmail">Email: <span style="color: red;">*</span></label>
-                    <input type="email" id="complaintEmail" name="email" required>
-                    <div class="error-message" id="complaintEmailError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="complaintPhone">Phone Number:</label>
-                    <input type="tel" id="complaintPhone" name="phone">
-                </div>
-                <div class="form-group">
-                    <label for="complaintCategory">Category: <span style="color: red;">*</span></label>
-                    <select id="complaintCategory" name="category" required>
-                        <option value="">Select Category</option>
-                        <option value="service">Service Quality</option>
-                        <option value="staff">Staff Behavior</option>
-                        <option value="facility">Facility Issues</option>
-                        <option value="system">System Problems</option>
-                        <option value="billing">Billing Issues</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <div class="error-message" id="complaintCategoryError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
-                    <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
-                    <div class="error-message" id="complaintDescriptionError"></div>
-                </div>
-                <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
-                <div class="loading" id="complaintLoading">
-                    <div class="spinner"></div>
-                    <p>Submitting your complaint...</p>
-                </div>
-                <div class="status-message" id="complaintStatus"></div>
-            </form>
-        </div>
+    <div class="main-content">
+      <div class="option-card complaints-card" id="complaintsCard">
+        <div class="card-icon complaints-icon">⚠️</div>
+        <h2 class="card-title complaints-title">Submit Complaint</h2>
+        <p class="card-description">Have an issue or concern? Let us know about any problems you've experienced.</p>
+        <button class="card-button complaints-button">File Complaint</button>
+      </div>
+
+      <div class="option-card aspirations-card" id="aspirationsCard">
+        <div class="card-icon aspirations-icon">💡</div>
+        <h2 class="card-title aspirations-title">Share Aspiration</h2>
+        <p class="card-description">Have ideas for improvement? Share your suggestions and aspirations with us.</p>
+        <button class="card-button">Share Ideas</button>
+      </div>
     </div>
 
-    <!-- Aspirations Modal -->
-    <div id="aspirationsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('aspirations')">&times;</span>
-            <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
-            <form id="aspirationsForm">
-                <div class="form-group">
-                    <label for="aspirationName">Full Name: <span style="color: red;">*</span></label>
-                    <input type="text" id="aspirationName" name="name" required>
-                    <div class="error-message" id="aspirationNameError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="aspirationEmail">Email: <span style="color: red;">*</span></label>
-                    <input type="email" id="aspirationEmail" name="email" required>
-                    <div class="error-message" id="aspirationEmailError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="aspirationPhone">Phone Number:</label>
-                    <input type="tel" id="aspirationPhone" name="phone">
-                </div>
-                <div class="form-group">
-                    <label for="aspirationCategory">Category: <span style="color: red;">*</span></label>
-                    <select id="aspirationCategory" name="category" required>
-                        <option value="">Select Category</option>
-                        <option value="service-improvement">Service Improvement</option>
-                        <option value="new-feature">New Features</option>
-                        <option value="policy">Policy Suggestions</option>
-                        <option value="innovation">Innovation Ideas</option>
-                        <option value="training">Training & Development</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <div class="error-message" id="aspirationCategoryError"></div>
-                </div>
-                <div class="form-group">
-                    <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
-                    <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
-                    <div class="error-message" id="aspirationDescriptionError"></div>
-                </div>
-                <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
-                <div class="loading" id="aspirationLoading">
-                    <div class="spinner"></div>
-                    <p>Submitting your aspiration...</p>
-                </div>
-                <div class="status-message" id="aspirationStatus"></div>
-            </form>
-        </div>
+    <div class="footer">
+      <p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p>
     </div>
-    
-    <script>
+  </div>
+
+  <!-- Complaints Modal -->
+  <div id="complaintsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="complaintsClose">&times;</span>
+      <h2 style="color: #dc143c; margin-bottom: 20px;">Submit Your Complaint</h2>
+      <form id="complaintsForm">
+        <!-- form groups -->
+        <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
+        <div class="loading" id="complaintLoading"><div class="spinner"></div><p>Submitting your complaint...</p></div>
+        <div class="status-message" id="complaintStatus"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Aspirations Modal -->
+  <div id="aspirationsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="aspirationsClose">&times;</span>
+      <h2 style="color: #1e3c72; margin-bottom: 20px;">Share Your Aspiration</h2>
+      <form id="aspirationsForm">
+        <!-- form groups -->
+        <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
+        <div class="loading" id="aspirationLoading"><div class="spinner"></div><p>Submitting your aspiration...</p></div>
+        <div class="status-message" id="aspirationStatus"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
 
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('complaintsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleFormSubmit('complaints');
+      // Modal triggers
+      document.getElementById('complaintsCard').addEventListener('click', () => openModal('complaints'));
+      document.getElementById('aspirationsCard').addEventListener('click', () => openModal('aspirations'));
+
+      // Modal closes
+      document.getElementById('complaintsClose').addEventListener('click', () => closeModal('complaints'));
+      document.getElementById('aspirationsClose').addEventListener('click', () => closeModal('aspirations'));
+      window.addEventListener('click', e => {
+        if (e.target.classList.contains('modal')) {
+          closeModal('complaints');
+          closeModal('aspirations');
+        }
+      });
+      window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeModal('complaints');
+          closeModal('aspirations');
+        }
       });
 
-      document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleFormSubmit('aspirations');
-      });
-
-      document.querySelector('.complaints-card').addEventListener('click', () => openModal('complaints'));
-      document.querySelector('.aspirations-card').addEventListener('click', () => openModal('aspirations'));
+      // Form submissions
+      setupForm('complaints');
+      setupForm('aspirations');
     });
 
     function openModal(type) {
-      const modal = document.getElementById(`${type}Modal`);
-      if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-      }
+      document.getElementById(`${type}Modal`).style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(type) {
+      document.getElementById(`${type}Modal`).style.display = 'none';
+      document.body.style.overflow = 'auto';
+      document.getElementById(`${type}Form`).reset();
+      document.getElementById(`${type}Status`).style.display = 'none';
+    }
+
+    function setupForm(type) {
+      const form = document.getElementById(`${type}Form`);
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        handleFormSubmit(type);
+      });
     }
 
     function handleFormSubmit(type) {
@@ -520,7 +469,7 @@
       formData.append('type', type === 'complaints' ? 'complaint' : 'aspiration');
       formData.append('timestamp', new Date().toISOString());
 
-      const submitBtn = document.getElementById(`${type}SubmitBtn`);
+      const submitBtn = document.getElementById(`${type === 'complaints' ? 'complaintSubmitBtn' : 'aspirationSubmitBtn'} `);
       const loadingDiv = document.getElementById(`${type}Loading`);
       const statusDiv = document.getElementById(`${type}Status`);
 
@@ -529,68 +478,31 @@
       statusDiv.style.display = 'none';
 
       const urlEncoded = new URLSearchParams();
-      for (let [key, value] of formData.entries()) {
-        urlEncoded.append(key, value);
-      }
+      for (let [key,value] of formData.entries()) urlEncoded.append(key,value);
 
-      console.log('🚀 Sending data to Google Apps Script:', Object.fromEntries(formData.entries()));
+      console.log('Sending', type, Object.fromEntries(formData.entries()));
 
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: urlEncoded
-      })
-      .then(() => {
-        console.log('✅ Submission successful');
-        showSuccess(type);
-      })
-      .catch(error => {
-        console.error('❌ Submission error:', error);
-        showError(type, 'There was an error submitting your form. Please try again.');
-      });
+      fetch(SCRIPT_URL, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:urlEncoded })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Response', data);
+          showStatus(type, data.status==='success', data.message);
+        }).catch(err => {
+          console.error('Error', err);
+          showStatus(type,false,'Submission failed');
+        });
     }
 
-    function showSuccess(type) {
-      alert(`${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully!`);
-
-      const submitBtn = document.getElementById(`${type}SubmitBtn`);
+    function showStatus(type,success,message) {
+      const submitBtn = document.getElementById(`${type === 'complaints' ? 'complaintSubmitBtn' : 'aspirationSubmitBtn'}`);
       const loadingDiv = document.getElementById(`${type}Loading`);
       const statusDiv = document.getElementById(`${type}Status`);
-
       submitBtn.disabled = false;
       loadingDiv.style.display = 'none';
-
-      statusDiv.innerHTML = `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully!`;
-      statusDiv.className = 'status-message success';
+      statusDiv.innerText = (success? '✅ ' : '❌ ') + message;
+      statusDiv.className = 'status-message ' + (success? 'success':'error');
       statusDiv.style.display = 'block';
-
-      setTimeout(() => closeModal(type), 3000);
-    }
-
-    function showError(type, message) {
-      alert(`Error: ${message}`);
-
-      const submitBtn = document.getElementById(`${type}SubmitBtn`);
-      const loadingDiv = document.getElementById(`${type}Loading`);
-      const statusDiv = document.getElementById(`${type}Status`);
-
-      submitBtn.disabled = false;
-      loadingDiv.style.display = 'none';
-
-      statusDiv.innerHTML = `❌ ${message}`;
-      statusDiv.className = 'status-message error';
-      statusDiv.style.display = 'block';
-    }
-
-    function closeModal(type) {
-      const modal = document.getElementById(`${type}Modal`);
-      if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        document.getElementById(`${type}Form`).reset();
-      }
+      if(success) setTimeout(()=>closeModal(type),3000);
     }
   </script>
 </body>

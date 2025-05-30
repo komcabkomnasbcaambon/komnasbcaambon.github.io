@@ -21,7 +21,7 @@
             opacity: 0.05;
             width: 800px;
             height: 800px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4c/BCA_logo.svg'); /* example BCA logo */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4c/BCA_logo.svg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -295,7 +295,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('complaints')">&times;</span>
             <h2 style="color: #dc143c; margin-bottom: 20px; text-align:center;">Submit Your Complaint</h2>
-            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
+            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST">
                 <input type="hidden" name="type" value="complaint">
                 <input type="hidden" name="timestamp" value="">
                 <div class="form-group">
@@ -335,7 +335,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('aspirations')">&times;</span>
             <h2 style="color: #1e3c72; margin-bottom: 20px; text-align:center;">Share Your Aspiration</h2>
-            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
+            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST">
                 <input type="hidden" name="type" value="aspiration">
                 <input type="hidden" name="timestamp" value="">
                 <div class="form-group">
@@ -370,8 +370,16 @@
             </form>
         </div>
     </div>
+    <!-- Submission Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content" style="text-align:center;">
+            <span class="close" onclick="closeModal('success')">&times;</span>
+            <h2>Thank you!</h2>
+            <p>Your form has been submitted.<br>We appreciate your feedback.</p>
+        </div>
+    </div>
     <script>
-        // Modal functions
+        // Modal open/close
         function openModal(type) {
             document.getElementById(type + "Modal").style.display = 'block';
             setTimeout(() => {
@@ -384,13 +392,30 @@
             let form = document.getElementById(type + "Modal").querySelector('form');
             if(form) form.reset();
         }
-        // Set timestamp before form submission
+        // Attach AJAX submit and show success modal
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('form').forEach(function(form){
-                form.addEventListener('submit', function() {
-                    var ts = form.querySelector('input[name="timestamp"]');
-                    if (ts) ts.value = new Date().toISOString();
-                });
+            ['complaints','aspirations'].forEach(function(type){
+                let form = document.querySelector(`#${type}Modal form`);
+                if(form){
+                    form.addEventListener('submit', function(e){
+                        e.preventDefault();
+                        let ts = form.querySelector('input[name="timestamp"]');
+                        if (ts) ts.value = new Date().toISOString();
+                        let formData = new FormData(form);
+                        fetch(form.action, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            body: formData
+                        });
+                        // Close current modal, show success
+                        closeModal(type);
+                        setTimeout(() => {
+                            openModal('success');
+                            // Auto-close success modal after 2 seconds
+                            setTimeout(() => closeModal('success'), 2000);
+                        }, 500);
+                    });
+                }
             });
         });
     </script>

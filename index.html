@@ -5,157 +5,394 @@
     <title>SP NIBA BCA - Complaints & Aspirations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; margin: 0; }
-        .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 15px; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);}
-        .header { text-align: center; margin-bottom: 30px;}
-        .main-content { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;}
-        .option-card { flex: 1; min-width: 260px; border-radius: 15px; padding: 32px 20px; background: #f4f7fb; text-align: center; cursor: pointer; transition: box-shadow 0.2s;}
-        .option-card:hover { box-shadow: 0 2px 16px rgba(30,60,114,0.12);}
-        .complaints-card { border-left: 5px solid #dc143c;}
-        .aspirations-card { border-left: 5px solid #1e3c72;}
-        .card-icon { font-size: 3rem; margin-bottom: 18px;}
-        .footer { text-align: center; color: #777; margin-top: 40px;}
-        .modal { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 100;}
-        .modal-content { background: #fff; margin: 5% auto; padding: 32px; border-radius: 8px; max-width: 400px;}
-        .close { float: right; font-size: 28px; font-weight: bold; color: #888; cursor: pointer;}
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 5px; }
-        input, textarea, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-        .submit-btn { background: #1e3c72; color: #fff; border: none; padding: 12px 0; border-radius: 6px; font-weight: bold; cursor: pointer;}
-        .submit-btn:hover { background: #2a5298; }
-        @media (max-width: 768px) { .main-content { flex-direction: column; gap: 18px; } .container { padding: 10px; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .background-logo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+            width: 800px;
+            height: 800px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4c/BCA_logo.svg'); /* example BCA logo */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+        }
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+        .header p {
+            color: #e0e8f7;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        .main-content {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+        .option-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #1e3c72, #dc143c);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .option-card:hover::before {
+            transform: scaleX(1);
+        }
+        .option-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .complaints-card {
+            border-left: 5px solid #dc143c;
+        }
+        .aspirations-card {
+            border-left: 5px solid #1e3c72;
+        }
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 25px;
+        }
+        .complaints-icon {
+            background: linear-gradient(135deg, #dc143c, #ff6b6b);
+        }
+        .aspirations-icon {
+            background: linear-gradient(135deg, #1e3c72, #4dabf7);
+        }
+        .card-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .complaints-title {
+            color: #dc143c;
+        }
+        .aspirations-title {
+            color: #1e3c72;
+        }
+        .card-description {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .card-button {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .complaints-button {
+            background: linear-gradient(135deg, #dc143c, #ff6b6b);
+        }
+        .card-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #e0e8f7;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-50px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem;}
+            .main-content { flex-direction: column; align-items: center;}
+            .option-card { max-width: 100%;}
+            .modal-content { margin: 10% auto; padding: 20px; width: 95%;}
+            .background-logo { width: 300px; height: 300px;}
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h2>BCA AMBON<br>KOMCAB KOMNAS SP NIBA</h2>
-        <p>We value your feedback and aspirations for continuous improvement</p>
-    </div>
-    <div class="main-content">
-        <div class="option-card complaints-card" onclick="openModal('complaints')">
-            <div class="card-icon">⚠️</div>
-            <h3 style="color:#dc143c;">Submit Complaint</h3>
-            <p>Have an issue or concern? Let us know.</p>
-            <button class="submit-btn" style="background:#dc143c;margin-top:15px;">File Complaint</button>
+    <div class="background-logo"></div>
+    <div class="container">
+        <div class="header">
+            <h1>BCA AMBON</h1>
+            <h1>KOMCAB KOMNAS SP NIBA</h1>
+            <p>Komite Cabang - We value your feedback and aspirations for continuous improvement</p>
         </div>
-        <div class="option-card aspirations-card" onclick="openModal('aspirations')">
-            <div class="card-icon">💡</div>
-            <h3 style="color:#1e3c72;">Share Aspiration</h3>
-            <p>Have ideas for improvement? Share your suggestions.</p>
-            <button class="submit-btn" style="margin-top:15px;">Share Ideas</button>
+        <div class="main-content">
+            <div class="option-card complaints-card" onclick="openModal('complaints')">
+                <div class="card-icon complaints-icon">⚠️</div>
+                <h2 class="card-title complaints-title">Submit Complaint</h2>
+                <p class="card-description">
+                    Have an issue or concern? Let us know about any problems you've experienced. 
+                    Your feedback helps us improve our services and resolve issues promptly.
+                </p>
+                <button class="card-button complaints-button" style="margin-top:10px;">File Complaint</button>
+            </div>
+            <div class="option-card aspirations-card" onclick="openModal('aspirations')">
+                <div class="card-icon aspirations-icon">💡</div>
+                <h2 class="card-title aspirations-title">Share Aspiration</h2>
+                <p class="card-description">
+                    Have ideas for improvement? Share your suggestions and aspirations with us. 
+                    We value your input in making our organization better for everyone.
+                </p>
+                <button class="card-button" style="margin-top:10px;">Share Ideas</button>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.</p>
         </div>
     </div>
-    <div class="footer">
-        &copy; 2025 KOMCAB KOMNAS SP NIBA - Komite Cabang. All rights reserved.
+    <!-- Complaints Modal -->
+    <div id="complaintsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('complaints')">&times;</span>
+            <h2 style="color: #dc143c; margin-bottom: 20px; text-align:center;">Submit Your Complaint</h2>
+            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
+                <input type="hidden" name="type" value="complaint">
+                <input type="hidden" name="timestamp" value="">
+                <div class="form-group">
+                    <label for="complaintName">Full Name: <span style="color: red;">*</span></label>
+                    <input type="text" id="complaintName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="complaintEmail">Email: <span style="color: red;">*</span></label>
+                    <input type="email" id="complaintEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="complaintPhone">Phone Number:</label>
+                    <input type="tel" id="complaintPhone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="complaintCategory">Category: <span style="color: red;">*</span></label>
+                    <select id="complaintCategory" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="service">Service Quality</option>
+                        <option value="staff">Staff Behavior</option>
+                        <option value="facility">Facility Issues</option>
+                        <option value="system">System Problems</option>
+                        <option value="billing">Billing Issues</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
+                    <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="complaintSubmitBtn" style="background:linear-gradient(135deg, #dc143c, #ff6b6b);">Submit Complaint</button>
+            </form>
+        </div>
     </div>
-</div>
-
-<!-- Complaints Modal -->
-<div id="complaintsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('complaints')">&times;</span>
-        <h2 style="color: #dc143c; text-align:center;">Submit Your Complaint</h2>
-        <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
-            <input type="hidden" name="type" value="complaint">
-            <input type="hidden" name="timestamp" value="">
-            <div class="form-group">
-                <label for="complaintName">Full Name*</label>
-                <input type="text" id="complaintName" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="complaintEmail">Email*</label>
-                <input type="email" id="complaintEmail" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="complaintPhone">Phone</label>
-                <input type="tel" id="complaintPhone" name="phone">
-            </div>
-            <div class="form-group">
-                <label for="complaintCategory">Category*</label>
-                <select id="complaintCategory" name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="service">Service Quality</option>
-                    <option value="staff">Staff Behavior</option>
-                    <option value="facility">Facility Issues</option>
-                    <option value="system">System Problems</option>
-                    <option value="billing">Billing Issues</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="complaintDescription">Describe Your Complaint*</label>
-                <textarea id="complaintDescription" name="description" rows="4" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn" style="background:#dc143c;">Submit Complaint</button>
-        </form>
+    <!-- Aspirations Modal -->
+    <div id="aspirationsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('aspirations')">&times;</span>
+            <h2 style="color: #1e3c72; margin-bottom: 20px; text-align:center;">Share Your Aspiration</h2>
+            <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
+                <input type="hidden" name="type" value="aspiration">
+                <input type="hidden" name="timestamp" value="">
+                <div class="form-group">
+                    <label for="aspirationName">Full Name: <span style="color: red;">*</span></label>
+                    <input type="text" id="aspirationName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="aspirationEmail">Email: <span style="color: red;">*</span></label>
+                    <input type="email" id="aspirationEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="aspirationPhone">Phone Number:</label>
+                    <input type="tel" id="aspirationPhone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="aspirationCategory">Category: <span style="color: red;">*</span></label>
+                    <select id="aspirationCategory" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="service-improvement">Service Improvement</option>
+                        <option value="new-feature">New Features</option>
+                        <option value="policy">Policy Suggestions</option>
+                        <option value="innovation">Innovation Ideas</option>
+                        <option value="training">Training & Development</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
+                    <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
+            </form>
+        </div>
     </div>
-</div>
-
-<!-- Aspirations Modal -->
-<div id="aspirationsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('aspirations')">&times;</span>
-        <h2 style="color: #1e3c72; text-align:center;">Share Your Aspiration</h2>
-        <form action="https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec" method="POST" target="_blank">
-            <input type="hidden" name="type" value="aspiration">
-            <input type="hidden" name="timestamp" value="">
-            <div class="form-group">
-                <label for="aspirationName">Full Name*</label>
-                <input type="text" id="aspirationName" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="aspirationEmail">Email*</label>
-                <input type="email" id="aspirationEmail" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="aspirationPhone">Phone</label>
-                <input type="tel" id="aspirationPhone" name="phone">
-            </div>
-            <div class="form-group">
-                <label for="aspirationCategory">Category*</label>
-                <select id="aspirationCategory" name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="service-improvement">Service Improvement</option>
-                    <option value="new-feature">New Features</option>
-                    <option value="policy">Policy Suggestions</option>
-                    <option value="innovation">Innovation Ideas</option>
-                    <option value="training">Training & Development</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="aspirationDescription">Describe Your Aspiration*</label>
-                <textarea id="aspirationDescription" name="description" rows="4" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn">Submit Aspiration</button>
-        </form>
-    </div>
-</div>
-
-<script>
-// Modal functions
-function openModal(type) {
-    document.getElementById(type + "Modal").style.display = 'block';
-    setTimeout(() => {
-        let first = document.querySelector(`#${type}Modal input[type="text"]`);
-        if (first) first.focus();
-    }, 200);
-}
-function closeModal(type) {
-    document.getElementById(type + "Modal").style.display = 'none';
-    let form = document.getElementById(type + "Modal").querySelector('form');
-    if(form) form.reset();
-}
-// Set timestamp just before form submission
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('form').forEach(function(form){
-        form.addEventListener('submit', function() {
-            var ts = form.querySelector('input[name="timestamp"]');
-            if (ts) ts.value = new Date().toISOString();
+    <script>
+        // Modal functions
+        function openModal(type) {
+            document.getElementById(type + "Modal").style.display = 'block';
+            setTimeout(() => {
+                let first = document.querySelector(`#${type}Modal input[type="text"]`);
+                if (first) first.focus();
+            }, 200);
+        }
+        function closeModal(type) {
+            document.getElementById(type + "Modal").style.display = 'none';
+            let form = document.getElementById(type + "Modal").querySelector('form');
+            if(form) form.reset();
+        }
+        // Set timestamp before form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form').forEach(function(form){
+                form.addEventListener('submit', function() {
+                    var ts = form.querySelector('input[name="timestamp"]');
+                    if (ts) ts.value = new Date().toISOString();
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 </body>
 </html>

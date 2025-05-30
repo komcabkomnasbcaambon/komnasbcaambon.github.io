@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SP NIBA BCA - Complaints & Aspirations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https://script.google.com; connect-src 'self' https://script.google.com;"> -->
     <style>
         * {
             margin: 0;
@@ -17,22 +18,6 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
-        }
-
-        .background-logo {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.05;
-            width: 800px;
-            height: 800px;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjgwMCIgdmlld0JveD0iMCAwIDgwMCA4MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjQwMCIgY3k9IjQwMCIgcj0iMzgwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNDAiLz4KPHN2ZyB4PSIyMDAiIHk9IjIwMCIgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiPgo8cGF0aCBkPSJNMTAwIDUwTDIwMCA1MEwyMDAgMTUwTDI1MCA1MEwzNTAgNTBMMzUwIDIwMEwyMDAgMjAwTDIwMCAzNTBMMTAwIDM1MFoiIGZpbGw9IiNmZmYiLz4KPHN2ZyB4PSI3NSIgeT0iMjI1IiB3aWR0aD0iMjUwIiBoZWlnaHQ9IjEwMCI+Cjx0ZXh0IHg9IjEyNSIgeT0iNTAiIGZpbGw9IiMwMDU1OTkiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlNQIE5JQkE8L3RleHQ+Cjx0ZXh0IHg9IjEyNSIgeT0iODAiIGZpbGw9IiMwMDU1OTkiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJDQTwvdGV4dD4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            pointer-events: none;
-            z-index: 0;
         }
 
         .container {
@@ -211,6 +196,8 @@
             max-width: 600px;
             position: relative;
             animation: modalSlideIn 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .close {
@@ -265,6 +252,7 @@
             cursor: pointer;
             width: 100%;
             transition: all 0.3s ease;
+            font-weight: bold;
         }
 
         .submit-btn:hover {
@@ -283,6 +271,17 @@
             text-align: center;
             margin-top: 10px;
             color: #666;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
         }
 
         .status-message {
@@ -308,8 +307,9 @@
 
         .error-message {
             color: #dc143c;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             margin-top: 5px;
+            display: none;
         }
 
         @keyframes fadeInUp {
@@ -334,6 +334,11 @@
             }
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -351,13 +356,12 @@
             .modal-content {
                 margin: 10% auto;
                 padding: 20px;
+                width: 95%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="background-logo"></div>
-    
     <div class="container">
         <div class="header">
             <h1>BCA AMBON</h1>
@@ -366,24 +370,24 @@
         </div>
 
         <div class="main-content">
-            <div class="option-card complaints-card" onclick="openModal('complaints')">
+            <div class="option-card complaints-card" id="complaintsCard">
                 <div class="card-icon complaints-icon">⚠️</div>
                 <h2 class="card-title complaints-title">Submit Complaint</h2>
                 <p class="card-description">
                     Have an issue or concern? Let us know about any problems you've experienced. 
                     Your feedback helps us improve our services and resolve issues promptly.
                 </p>
-                <button class="card-button complaints-button">File Complaint</button>
+                <button class="submit-btn" style="background:#dc143c;" onclick="openModal('complaints')">File Complaint</button>
             </div>
 
-            <div class="option-card aspirations-card" onclick="openModal('aspirations')">
+            <div class="option-card aspirations-card" id="aspirationsCard">
                 <div class="card-icon aspirations-icon">💡</div>
                 <h2 class="card-title aspirations-title">Share Aspiration</h2>
                 <p class="card-description">
                     Have ideas for improvement? Share your suggestions and aspirations with us. 
                     We value your input in making our organization better for everyone.
                 </p>
-                <button class="card-button">Share Ideas</button>
+                <button class="submit-btn" onclick="openModal('aspirations')">Share Ideas</button>
             </div>
         </div>
 
@@ -401,10 +405,12 @@
                 <div class="form-group">
                     <label for="complaintName">Full Name: <span style="color: red;">*</span></label>
                     <input type="text" id="complaintName" name="name" required>
+                    <div class="error-message" id="complaintNameError"></div>
                 </div>
                 <div class="form-group">
                     <label for="complaintEmail">Email: <span style="color: red;">*</span></label>
                     <input type="email" id="complaintEmail" name="email" required>
+                    <div class="error-message" id="complaintEmailError"></div>
                 </div>
                 <div class="form-group">
                     <label for="complaintPhone">Phone Number:</label>
@@ -421,14 +427,17 @@
                         <option value="billing">Billing Issues</option>
                         <option value="other">Other</option>
                     </select>
+                    <div class="error-message" id="complaintCategoryError"></div>
                 </div>
                 <div class="form-group">
                     <label for="complaintDescription">Describe Your Complaint: <span style="color: red;">*</span></label>
                     <textarea id="complaintDescription" name="description" rows="5" required placeholder="Please provide detailed information about your complaint..."></textarea>
+                    <div class="error-message" id="complaintDescriptionError"></div>
                 </div>
                 <button type="submit" class="submit-btn" id="complaintSubmitBtn">Submit Complaint</button>
                 <div class="loading" id="complaintLoading">
-                    <p>📤 Submitting your complaint...</p>
+                    <div class="spinner"></div>
+                    <span>Submitting your complaint...</span>
                 </div>
                 <div class="status-message" id="complaintStatus"></div>
             </form>
@@ -444,10 +453,12 @@
                 <div class="form-group">
                     <label for="aspirationName">Full Name: <span style="color: red;">*</span></label>
                     <input type="text" id="aspirationName" name="name" required>
+                    <div class="error-message" id="aspirationNameError"></div>
                 </div>
                 <div class="form-group">
                     <label for="aspirationEmail">Email: <span style="color: red;">*</span></label>
                     <input type="email" id="aspirationEmail" name="email" required>
+                    <div class="error-message" id="aspirationEmailError"></div>
                 </div>
                 <div class="form-group">
                     <label for="aspirationPhone">Phone Number:</label>
@@ -464,317 +475,101 @@
                         <option value="training">Training & Development</option>
                         <option value="other">Other</option>
                     </select>
+                    <div class="error-message" id="aspirationCategoryError"></div>
                 </div>
                 <div class="form-group">
                     <label for="aspirationDescription">Describe Your Aspiration: <span style="color: red;">*</span></label>
                     <textarea id="aspirationDescription" name="description" rows="5" required placeholder="Share your ideas and suggestions for improvement..."></textarea>
+                    <div class="error-message" id="aspirationDescriptionError"></div>
                 </div>
                 <button type="submit" class="submit-btn" id="aspirationSubmitBtn">Submit Aspiration</button>
                 <div class="loading" id="aspirationLoading">
-                    <p>💡 Submitting your aspiration...</p>
+                    <div class="spinner"></div>
+                    <span>Submitting your aspiration...</span>
                 </div>
                 <div class="status-message" id="aspirationStatus"></div>
             </form>
         </div>
     </div>
 
+    <!-- Hidden iframe for fallback form submission -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
     <script>
-    // Your Google Apps Script Web App URL
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec';
-
-    console.log('🚀 SP NIBA Complaint System Initialized');
-    console.log('📡 Script URL:', SCRIPT_URL);
-
-    function openModal(type) {
-        document.getElementById(type + 'Modal').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        console.log(`📋 Opened ${type} modal`);
-    }
-
-    function closeModal(type) {
-        document.getElementById(type + 'Modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        const CONFIG = {
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzVxWm6tmjbCVGMXr5-ALUhnDk6GiHnU0lZhuRlXzRhedYrqPQEOK96O-F5iXqyqhlR/exec'
+        };
         
-        // Reset form and status messages
-        const form = document.getElementById(type + 'Form');
-        const statusDiv = document.getElementById(type + 'Status');
-        const loadingDiv = document.getElementById(type + 'Loading');
-        const submitBtn = document.getElementById(type + 'SubmitBtn');
-        
-        form.reset();
-        statusDiv.style.display = 'none';
-        loadingDiv.style.display = 'none';
-        submitBtn.disabled = false;
-        
-        // Clear all error messages
-        document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-        document.querySelectorAll('input, textarea, select').forEach(field => {
-            field.style.borderColor = '#ddd';
-        });
-        
-        console.log(`❌ Closed ${type} modal`);
-    }
-
-    // Close modal when clicking outside of it
-    window.onclick = function(event) {
-        const complaintsModal = document.getElementById('complaintsModal');
-        const aspirationsModal = document.getElementById('aspirationsModal');
-
-        if (event.target == complaintsModal) {
-            closeModal('complaints');
-        }
-        if (event.target == aspirationsModal) {
-            closeModal('aspirations');
-        }
-    }
-
-    // Enhanced form submission function
-    async function submitForm(formElement, type) {
-        const submitBtn = document.getElementById(type + 'SubmitBtn');
-        const loadingDiv = document.getElementById(type + 'Loading');
-        const statusDiv = document.getElementById(type + 'Status');
-        
-        console.log(`📤 Starting ${type} submission...`);
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        loadingDiv.style.display = 'block';
-        statusDiv.style.display = 'none';
-
-        try {
-            // Prepare form data
-            const formData = new FormData(formElement);
-            const data = {};
-            
-            // Convert FormData to regular object
-            for (let [key, value] of formData.entries()) {
-                data[key] = value.trim();
-            }
-            
-            // Add metadata
-            data.type = type === 'complaints' ? 'complaint' : 'aspiration';
-            data.timestamp = new Date().toISOString();
-            
-            console.log('📋 Form data prepared:', data);
-
-            // Method 1: Try URL-encoded form submission (most reliable for Google Apps Script)
-            const formBody = new URLSearchParams(data).toString();
-            
-            console.log('🔄 Sending request...');
-            
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Important for Google Apps Script
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formBody
-            });
-
-            console.log('✅ Request sent successfully');
-            
-            // Since we're using no-cors mode, we can't read the response
-            // But if we reach here without error, the request was sent
-            showStatus(statusDiv, 'success', 
-                `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! 
-                Thank you for your feedback. We will review it and get back to you if needed.`);
-            
-            // Auto close after 4 seconds
+        // Modal functions
+        function openModal(type) {
+            document.getElementById(type + "Modal").style.display = 'block';
             setTimeout(() => {
-                closeModal(type);
-            }, 4000);
-
-        } catch (error) {
-            console.error('❌ Submission error:', error);
-            
-            // Try alternative method with JSON
-            try {
-                console.log('🔄 Trying alternative submission method...');
-                
-                const jsonResponse = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                console.log('✅ Alternative method successful');
-                showStatus(statusDiv, 'success', 
-                    `✅ ${type === 'complaints' ? 'Complaint' : 'Aspiration'} submitted successfully! 
-                    Thank you for your feedback.`);
-                
-                setTimeout(() => {
-                    closeModal(type);
-                }, 4000);
-                
-            } catch (secondError) {
-                console.error('❌ Both submission methods failed:', secondError);
-                showStatus(statusDiv, 'error', 
-                    `❌ Submission failed. Please check your internet connection and try again. 
-                    If the problem persists, please contact support.`);
-            }
-        } finally {
-            submitBtn.disabled = false;
-            loadingDiv.style.display = 'none';
+                let first = document.querySelector(`#${type}Modal input`);
+                if (first) first.focus();
+            }, 200);
         }
-    }
-
-    function showStatus(statusDiv, type, message) {
-        statusDiv.innerHTML = message;
-        statusDiv.className = `status-message ${type}`;
-        statusDiv.style.display = 'block';
-        console.log(`📢 Status: ${type} - ${message}`);
-    }
-
-    // Form validation function
-    function validateForm(form) {
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
+        function closeModal(type) {
+            document.getElementById(type + "Modal").style.display = 'none';
+            // Reset form
+            let form = document.getElementById(type + "Form");
+            if(form) form.reset();
+        }
         
-        // Clear previous error messages
-        document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+        // Debug: show all fields being posted
+        function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const type = form.id.replace('Form', '');
+            // Debug 1: Modal form values
+            console.log('Modal form values:');
+            new FormData(form).forEach((v, k) => console.log(k, v));
+            // Prepare hidden form
+            const hiddenForm = document.createElement('form');
+            hiddenForm.method = 'POST';
+            hiddenForm.action = CONFIG.SCRIPT_URL;
+            hiddenForm.target = 'hidden_iframe';
+            hiddenForm.style.display = 'none';
         
-        requiredFields.forEach(field => {
-            const value = field.value.trim();
-            
-            if (!value) {
-                field.style.borderColor = '#dc143c';
-                isValid = false;
-                
-                // Add error message
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'This field is required';
-                field.parentNode.appendChild(errorMsg);
-            } else {
-                field.style.borderColor = '#ddd';
-                
-                // Validate email format
-                if (field.type === 'email' && value) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(value)) {
-                        field.style.borderColor = '#dc143c';
-                        isValid = false;
-                        
-                        const errorMsg = document.createElement('div');
-                        errorMsg.className = 'error-message';
-                        errorMsg.textContent = 'Please enter a valid email address';
-                        field.parentNode.appendChild(errorMsg);
-                    }
-                }
-            }
+            new FormData(form).forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                hiddenForm.appendChild(input);
+            });
+        
+            // Add type and timestamp
+            const typeInput = document.createElement('input');
+            typeInput.type = 'hidden';
+            typeInput.name = 'type';
+            typeInput.value = type === 'complaints' ? 'complaint' : 'aspiration';
+            hiddenForm.appendChild(typeInput);
+        
+            const tsInput = document.createElement('input');
+            tsInput.type = 'hidden';
+            tsInput.name = 'timestamp';
+            tsInput.value = new Date().toISOString();
+            hiddenForm.appendChild(tsInput);
+        
+            // Debug 2: Hidden form values
+            console.log('Hidden form values to submit:');
+            Array.from(hiddenForm.elements).forEach(input => console.log(input.name, input.value));
+        
+            document.body.appendChild(hiddenForm);
+            hiddenForm.submit();
+            setTimeout(() => {
+                document.body.removeChild(hiddenForm);
+            }, 2000);
+        
+            alert("Form submitted! Please check your spreadsheet.");
+        }
+        
+        // Attach event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('complaintsForm').addEventListener('submit', handleSubmit);
+            document.getElementById('aspirationsForm').addEventListener('submit', handleSubmit);
         });
-        
-        if (!isValid) {
-            console.log('⚠️ Form validation failed');
-            alert('⚠️ Please fill in all required fields correctly');
-        } else {
-            console.log('✅ Form validation passed');
-        }
-        
-        return isValid;
-    }
-
-    // Form submission handlers
-    document.getElementById('complaintsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('📝 Complaints form submitted');
-        
-        if (validateForm(this)) {
-            submitForm(this, 'complaints');
-        }
-    });
-
-    document.getElementById('aspirationsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('💡 Aspirations form submitted');
-        
-        if (validateForm(this)) {
-            submitForm(this, 'aspirations');
-        }
-    });
-
-    // Real-time validation
-    document.querySelectorAll('input[required], textarea[required], select[required]').forEach(field => {
-        field.addEventListener('blur', function() {
-            const value = this.value.trim();
-            
-            if (!value) {
-                this.style.borderColor = '#dc143c';
-            } else {
-                this.style.borderColor = '#ddd';
-                
-                // Remove error message
-                const errorMsg = this.parentNode.querySelector('.error-message');
-                if (errorMsg) {
-                    errorMsg.remove();
-                }
-                
-                // Validate email on blur
-                if (this.type === 'email' && value) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(value)) {
-                        this.style.borderColor = '#dc143c';
-                        
-                        if (!this.parentNode.querySelector('.error-message')) {
-                            const errorMsg = document.createElement('div');
-                            errorMsg.className = 'error-message';
-                            errorMsg.textContent = 'Please enter a valid email address';
-                            this.parentNode.appendChild(errorMsg);
-                        }
-                    }
-                }
-            }
-        });
-
-        field.addEventListener('input', function() {
-            if (this.value.trim()) {
-                this.style.borderColor = '#ddd';
-                
-                // Remove error message
-                const errorMsg = this.parentNode.querySelector('.error-message');
-                if (errorMsg) {
-                    errorMsg.remove();
-                }
-            }
-        });
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Escape key to close modals
-        if (e.key === 'Escape') {
-            if (document.getElementById('complaintsModal').style.display === 'block') {
-                closeModal('complaints');
-            }
-            if (document.getElementById('aspirationsModal').style.display === 'block') {
-                closeModal('aspirations');
-            }
-        }
-    });
-
-    // Page initialization
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🎉 SP NIBA Complaint System Ready');
-        
-        // Animate cards on load
-        const cards = document.querySelectorAll('.option-card');
-        cards.forEach((card, index) => {
-            card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.2}s both`;
-        });
-
-        // Test connection to Google Apps Script
-        console.log('🔍 Testing connection to Google Apps Script...');
-        console.log('📡 Script URL configured:', SCRIPT_URL);
-        
-        // Show system status
-        console.log('✅ System Status: Ready for submissions');
-        console.log('📝 Available forms: Complaints, Aspirations');
-        console.log('🔒 Validation: Active');
-        console.log('📊 Data destination: Google Sheets');
-    });
-</script>
+        </script>
+    
 </body>
 </html>
